@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Create Client</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --fg: #09090b;
+      --muted: #71717a;
+      --border: #e4e4e7;
+      --input-bg: #ffffff;
+      --ring: #18181b;
+      --card-bg: #ffffff;
+      --card-shadow: 0 1px 3px 0 rgb(0 0 0 / .1), 0 1px 2px -1px rgb(0 0 0 / .1);
+      --radius: 0.5rem;
+      --btn-bg: #18181b;
+      --btn-fg: #fafafa;
+      --btn-hover: #27272a;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #09090b;
+        --fg: #fafafa;
+        --muted: #a1a1aa;
+        --border: #27272a;
+        --input-bg: #09090b;
+        --ring: #d4d4d8;
+        --card-bg: #18181b;
+        --card-shadow: 0 1px 3px 0 rgb(0 0 0 / .4), 0 1px 2px -1px rgb(0 0 0 / .4);
+        --btn-bg: #fafafa;
+        --btn-fg: #18181b;
+        --btn-hover: #e4e4e7;
+      }
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--fg);
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 360px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: calc(var(--radius) + 4px);
+      box-shadow: var(--card-shadow);
+      padding: 2rem;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 1.75rem;
+    }
+
+    h1 {
+      font-size: 1.375rem;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      font-size: 0.875rem;
+      color: var(--muted);
+      margin-top: 0.35rem;
+    }
+
+    .form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    label {
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    input {
+      height: 2.375rem;
+      padding: 0 0.75rem;
+      font-size: 0.875rem;
+      color: var(--fg);
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      outline: none;
+    }
+
+    input::placeholder { color: var(--muted); }
+
+    input:focus {
+      border-color: var(--ring);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 20%, transparent);
+    }
+
+    button {
+      height: 2.375rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--btn-fg);
+      background: var(--btn-bg);
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      margin-top: 0.25rem;
+    }
+
+    button:hover { background: var(--btn-hover); }
+
+    .error-msg {
+      display: none;
+      font-size: 0.8125rem;
+      color: #ef4444;
+    }
+
+    .success-msg {
+      display: none;
+      font-size: 0.8125rem;
+      color: #16a34a;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="card">
+  <div class="header">
+    <h1>Create Client</h1>
+    <p class="subtitle">Enter your application details</p>
+  </div>
+
+  <form id="companyForm" class="form">
+    
+    <div class="field">
+      <label>Application Name</label>
+      <input type="text" id="appName" placeholder="My App" required />
+    </div>
+
+    <div class="field">
+      <label>Application URL</label>
+      <input type="text" id="appUrl" placeholder="https://example.com" required />
+    </div>
+
+    <div class="field">
+      <label>Redirect URI</label>
+      <input type="text" id="redirectUri" placeholder="https://example.com/callback" required />
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="success-msg" id="successMsg"></div>
+
+    <button type="submit">Create Client</button>
+  </form>
+</div>
+
+<script>
+  const form = document.getElementById("companyForm");
+  const errorMsg = document.getElementById("errorMsg");
+  const successMsg = document.getElementById("successMsg");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    errorMsg.style.display = "none";
+    successMsg.style.display = "none";
+
+    const name = document.getElementById("appName").value;
+    const appUrl = document.getElementById("appUrl").value;
+    const redirectUri = document.getElementById("redirectUri").value;
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      window.location.href = "/o/authenticate";
+      return;
+    }
+
+    try {
+      const res = await fetch("/register-client", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({ name, appUrl, redirectUri })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        successMsg.style.display = "block";
+        successMsg.innerText = "Service created successfully";
+        form.reset();
+      } else {
+        errorMsg.style.display = "block";
+        errorMsg.innerText = data.message || "Error";
+      }
+
+    } catch (err) {
+      errorMsg.style.display = "block";
+      errorMsg.innerText = "Something went wrong";
+    }
+  });
+</script>
+
+</body>
+</html>

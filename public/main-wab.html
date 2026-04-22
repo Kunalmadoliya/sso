@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kunal</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Inter", sans-serif;
+      background: #09090b;
+      color: #fafafa;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      text-align: center;
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 12px;
+      padding: 40px 30px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    h1 { font-size: 2rem; margin-bottom: 10px; }
+    p { color: #a1a1aa; margin-bottom: 30px; }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: #fafafa;
+      color: #18181b;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn:hover { background: #e4e4e7; }
+  </style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>Kunal</h1>
+  <p>Simple SSO Service</p>
+
+  <button class="btn" onclick="login()">
+    Login with SSO
+  </button>
+</div>
+
+<script>
+function login() {
+  const client_id = "c0a014b4699d53eef179fe847585125d";
+  const redirect_uri = "http://localhost:3000/callback.html";
+  const state = Math.random().toString(36).substring(2);
+
+  window.location.href =
+    `http://localhost:3000/o/authenticate?client_id=${client_id}` +
+    `&redirect_uri=${encodeURIComponent(redirect_uri)}` +
+    `&state=${state}`;
+}
+</script>
+
+</body>
+</html>

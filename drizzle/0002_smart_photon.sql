@@ -1,0 +1,1 @@
+ALTER TABLE "clients" ADD COLUMN "application_url" text NOT NULL;
