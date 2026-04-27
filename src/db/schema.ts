@@ -33,8 +33,8 @@ export const clientsTable = pgTable("clients", {
   clientSecret: varchar("client_secret", { length: 100 }).notNull(),
 
   name: varchar("name", { length: 100 }),
-  applicationURL: text("application_url").notNull(),
-  redirectUri: text("redirect_uri").notNull(),
+  applicationURL: text("application_url").notNull().unique(),
+  redirectUri: text("redirect_uri").notNull().unique(),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

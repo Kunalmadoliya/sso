@@ -1,0 +1,2 @@
+ALTER TABLE "clients" ADD CONSTRAINT "clients_application_url_unique" UNIQUE("application_url");--> statement-breakpoint
+ALTER TABLE "clients" ADD CONSTRAINT "clients_redirect_uri_unique" UNIQUE("redirect_uri");

@@ -1,94 +1,240 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Provision Client | Kunal Auth</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-    <style>
-        body { 
-            font-family: 'Space Grotesk', sans-serif; 
-            background-color: #050505;
-            background-image: radial-gradient(#1a1a1a 1px, transparent 1px);
-            background-size: 24px 24px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .mono { font-family: 'JetBrains Mono', monospace; }
-        .bento-border { border: 1px solid #1f1f1f; }
-        .card-bg { background: rgba(10, 10, 10, 0.98); backdrop-filter: blur(20px); }
-        
-        input:focus { 
-            outline: none; 
-            border-color: #3f3f46; 
-            background: #0d0d0d !important;
-        }
-    </style>
-</head>
-<body class="text-zinc-400 antialiased p-6">
 
-    <div class="card-bg bento-border rounded-2xl p-6 md:p-8 w-full max-w-[380px] shadow-2xl">
-        
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      body {
+        font-family: "Space Grotesk", sans-serif;
+        background-color: #050505;
+        background-image: radial-gradient(#1a1a1a 1px, transparent 1px);
+        background-size: 24px 24px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
+      .mono {
+        font-family: "JetBrains Mono", monospace;
+      }
+      .bento-border {
+        border: 1px solid #1f1f1f;
+      }
+      .card-bg {
+        background: rgba(10, 10, 10, 0.98);
+        backdrop-filter: blur(20px);
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #3f3f46;
+        background: #0d0d0d !important;
+      }
+
+      .custom-scroll::-webkit-scrollbar {
+        height: 2px;
+      }
+      .custom-scroll::-webkit-scrollbar-thumb {
+        background: #333;
+      }
+    </style>
+  </head>
+
+  <body class="text-zinc-400 antialiased p-6">
+    <div
+      class="card-bg bento-border rounded-3xl p-6 md:p-8 w-full max-w-[440px] shadow-2xl"
+    >
+      <div id="ui-content">
+        <!-- FORM UI -->
         <div class="flex items-center gap-3 mb-8">
-            <div class="w-10 h-10 bg-white text-black flex items-center justify-center rounded-lg font-bold text-xl shadow-lg">
-                K
-            </div>
-            <div>
-                <h1 class="text-white font-bold leading-none tracking-tight text-lg">Kunal Auth</h1>
-                <span class="text-[9px] mono text-zinc-600 uppercase tracking-[0.2em] block">Security Provisioning</span>
-            </div>
+          <div
+            class="w-10 h-10 bg-white text-black flex items-center justify-center rounded-lg font-bold text-xl shadow-lg"
+          >
+            K
+          </div>
+          <div>
+            <h1
+              class="text-white font-bold leading-none tracking-tight text-lg"
+            >
+              Kunal Auth
+            </h1>
+            <span
+              class="text-[9px] mono text-zinc-600 uppercase tracking-[0.2em] block"
+              >Security Provisioning</span
+            >
+          </div>
         </div>
 
-        <h2 class="text-white font-bold text-base tracking-tight mb-6">Get a Client ID and Secret</h2>
+        <h2 class="text-white font-bold text-base tracking-tight mb-6">
+          Get a Client ID and Secret
+        </h2>
 
         <form id="registrationForm" class="space-y-4">
-            <div class="space-y-1.5">
-                <label class="block text-[10px] mono uppercase tracking-widest text-zinc-500 ml-1">Application Name</label>
-                <input type="text" id="app_name" placeholder="Acme App" 
-                    class="w-full bg-[#0a0a0a] bento-border rounded-lg px-4 py-2.5 text-zinc-200 text-sm transition-all placeholder:text-zinc-800" required />
-            </div>
+          <div class="space-y-1.5">
+            <label
+              class="block text-[10px] mono uppercase tracking-widest text-zinc-500 ml-1"
+              >Application Name</label
+            >
+            <input
+              type="text"
+              id="app_name"
+              placeholder="Acme App"
+              class="w-full bg-[#0a0a0a] bento-border rounded-lg px-4 py-2.5 text-zinc-200 text-sm"
+              required
+            />
+          </div>
 
-            <div class="space-y-1.5">
-                <label class="block text-[10px] mono uppercase tracking-widest text-zinc-500 ml-1">Website URL</label>
-                <input type="url" id="website_url" placeholder="https://acme.com" 
-                    class="w-full bg-[#0a0a0a] bento-border rounded-lg px-4 py-2.5 text-zinc-200 text-sm transition-all placeholder:text-zinc-800" required />
-            </div>
+          <div class="space-y-1.5">
+            <label
+              class="block text-[10px] mono uppercase tracking-widest text-zinc-500 ml-1"
+              >Website URL</label
+            >
+            <input
+              type="url"
+              id="website_url"
+              placeholder="https://acme.com"
+              class="w-full bg-[#0a0a0a] bento-border rounded-lg px-4 py-2.5 text-zinc-200 text-sm"
+              required
+            />
+          </div>
 
-            <div class="space-y-1.5">
-                <label class="block text-[10px] mono uppercase tracking-widest text-zinc-500 ml-1">Redirect URI</label>
-                <input type="text" id="redirect_uri" placeholder="https://acme.com/callback" 
-                    class="w-full bg-[#0a0a0a] bento-border rounded-lg px-4 py-2.5 text-zinc-200 text-xs mono transition-all placeholder:text-zinc-800" required />
-            </div>
+          <div class="space-y-1.5">
+            <label
+              class="block text-[10px] mono uppercase tracking-widest text-zinc-500 ml-1"
+              >Redirect URI</label
+            >
+            <input
+              type="text"
+              id="redirect_uri"
+              placeholder="https://acme.com/callback"
+              class="w-full bg-[#0a0a0a] bento-border rounded-lg px-4 py-2.5 text-zinc-200 text-xs mono"
+              required
+            />
+          </div>
 
-            <div class="pt-2">
-                <button type="submit" 
-                    class="w-full bg-white text-black font-bold py-3.5 rounded-lg text-xs uppercase tracking-widest hover:bg-zinc-200 transition-all active:scale-[0.98]">
-                    Register application
-                </button>
-            </div>
+          <div class="pt-2">
+            <button
+              type="submit"
+              class="w-full bg-white text-black font-bold py-3.5 rounded-lg text-xs uppercase tracking-widest hover:bg-zinc-200 transition-all"
+            >
+              Register application
+            </button>
+          </div>
         </form>
-
-       
+      </div>
     </div>
 
     <script>
-        const form = document.getElementById("registrationForm");
+      const form = document.getElementById("registrationForm");
 
-        form.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const btn = e.target.querySelector('button');
-            btn.innerText = "PROVISIONING...";
-            btn.disabled = true;
-         
-            setTimeout(() => { 
-                alert("Registered Successfully!");
-                btn.innerText = "Register application";
-                btn.disabled = false;
-            }, 1000);
-        });
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const btn = e.target.querySelector("button");
+        btn.innerText = "PROVISIONING...";
+        btn.disabled = true;
+
+        const name = document.getElementById("app_name").value;
+        const redirectUri = document.getElementById("redirect_uri").value;
+        const applicationURL = document.getElementById("website_url").value;
+
+        try {
+          const res = await fetch("/register-company", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({name, applicationURL, redirectUri}),
+          });
+
+          const data = await res.json();
+          if (!res.ok) throw new Error(data?.error?.message || "Failed");
+
+          const loginURL = `http://localhost:3000/authorization?client_id=${data.client_id}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=openid%20email%20profile&state=STATE&nonce=NONCE`;
+
+          // 🔥 Perfectly Balanced Medium Bento UI
+          document.getElementById("ui-content").innerHTML = `
+            <div class="flex justify-between items-center mb-8">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-white text-black flex items-center justify-center rounded-xl font-bold text-xl shadow-lg">K</div>
+                <div>
+                  <h1 class="text-white font-bold leading-none tracking-tight text-lg">Provisioned</h1>
+                  <span class="text-[10px] mono text-emerald-500 uppercase tracking-widest block mt-0.5">Handshake Active</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+              <div class="md:col-span-2 bento-border bg-white/[0.03] rounded-2xl p-5 border-l-2 border-emerald-500/50">
+                <p class="text-[10px] mono uppercase text-zinc-500 mb-1 tracking-wider">Application Identity</p>
+                <p class="text-white font-bold text-lg tracking-tight">${name}</p>
+              </div>
+
+              <div class="bento-border bg-zinc-900/40 rounded-2xl p-5 flex flex-col justify-between group h-32">
+                <div class="flex justify-between items-start">
+                  <p class="text-[10px] mono uppercase text-zinc-500 tracking-wider">Client ID</p>
+                  <button onclick="copy('cid', this)" class="text-[10px] text-zinc-500 hover:text-white mono uppercase font-bold transition-colors">Copy</button>
+                </div>
+                <p id="cid" class="text-zinc-100 mono text-sm break-all leading-snug line-clamp-2">${data.client_id}</p>
+              </div>
+
+              <div class="bento-border bg-zinc-900/40 rounded-2xl p-5 flex flex-col justify-between group h-32">
+                <div class="flex justify-between items-start">
+                  <p class="text-[10px] mono uppercase text-zinc-500 tracking-wider">Client Secret</p>
+                  <button onclick="copy('cs', this)" class="text-[10px] text-zinc-500 hover:text-white mono uppercase font-bold transition-colors">Copy</button>
+                </div>
+                <p id="cs" class="text-zinc-100 mono text-sm break-all leading-snug line-clamp-2">${data.client_secret}</p>
+              </div>
+
+              <div class="md:col-span-2 bento-border bg-zinc-900/40 rounded-2xl p-5">
+                <div class="flex justify-between items-center mb-3">
+                  <p class="text-[10px] mono uppercase text-zinc-500 tracking-wider">Authorization Endpoint</p>
+                  <button onclick="copy('url', this)" class="text-zinc-500 hover:text-white text-[10px] mono uppercase font-bold transition-colors">Copy URL</button>
+                </div>
+                <div id="url" class="text-zinc-400 mono text-[10px] overflow-x-auto whitespace-nowrap custom-scroll pb-2">
+                  ${loginURL}
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-amber-500/5 border border-amber-500/10 rounded-xl p-3.5 mb-8 flex items-center gap-3">
+              <span class="text-amber-600 text-sm">⚠</span>
+              <p class="text-[10px] text-amber-500/80 mono uppercase leading-tight tracking-tighter">
+                Save credentials immediately. The secret will not be stored in our database.
+              </p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <a href="/" class="bg-white text-black text-center py-3 rounded-xl text-xs font-bold uppercase tracking-[0.1em] hover:bg-zinc-200 transition-all">
+                Finish Setup
+              </a>
+              <button onclick="window.location.reload()" class="border border-zinc-800 text-zinc-400 py-3 rounded-xl text-xs font-bold uppercase tracking-[0.1em] hover:bg-zinc-900 hover:text-white transition-all">
+                Add Another
+              </button>
+            </div>
+          `;
+        } catch (err) {
+          alert(err.message);
+          btn.innerText = "Register application";
+          btn.disabled = false;
+        }
+      });
+
+      // ✅ global copy
+      function copy(id, btn) {
+        const text = document.getElementById(id).innerText;
+        navigator.clipboard.writeText(text);
+        const t = btn.innerText;
+        btn.innerText = "Copied!";
+        setTimeout(() => (btn.innerText = t), 1500);
+      }
     </script>
-</body>
+  </body>
 </html>

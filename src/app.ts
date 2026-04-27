@@ -1,10 +1,10 @@
 import crypto from "node:crypto";
 import express from "express";
 import path from "node:path";
-import {eq} from "drizzle-orm";
+import {eq, and} from "drizzle-orm";
 import JWT from "jsonwebtoken";
 import jose from "node-jose";
-import {usersTable} from "./db/schema";
+import {clientsTable, usersTable} from "./db/schema";
 import {PRIVATE_KEY, PUBLIC_KEY} from "./common/utils/cert";
 import type {JWTClaims} from "./common/utils/user-token";
 import db from "./db";
@@ -216,5 +216,42 @@ export function createApp() {
     return res.status(200).json({message: "Successfully logout"});
   });
 
+  // <----------register-company---------------->
+
+  app.post("/register-company", async (req, res) => {
+    const {name, applicationURL, redirectUri} = req.body;
+
+    if (!name || !applicationURL || !redirectUri) {
+      return res.status(401).json({error: {message: "Enter all feilds"}});
+    }
+
+    const [existingCompany] = await db
+      .select()
+      .from(clientsTable)
+      .where(
+        and(
+          eq(clientsTable.applicationURL, applicationURL),
+          eq(clientsTable.redirectUri, redirectUri),
+        ),
+      )
+      .limit(1);
+
+    if (existingCompany) {
+      return res.status(409).json({error: {message: "App already registerd"}});
+    }
+
+    const client_id = crypto.randomBytes(16).toString("hex");
+    const client_secret = crypto.randomBytes(32).toString("hex");
+
+    await db.insert(clientsTable).values({
+      clientId: client_id,
+      clientSecret: client_secret,
+      name: name,
+      applicationURL: applicationURL,
+      redirectUri: redirectUri,
+    });
+
+    res.status(200).json({client_id, client_secret});
+  });
   return app;
 }

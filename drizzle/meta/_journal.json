@@ -22,6 +22,13 @@
       "when": 1776870659080,
       "tag": "0002_smart_photon",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1777314718715,
+      "tag": "0003_lush_terrax",
+      "breakpoints": true
     }
   ]
 }
