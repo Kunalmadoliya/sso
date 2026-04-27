@@ -284,7 +284,7 @@
           </svg>
         </div>
         <h1>Welcome back</h1>
-        <p class="subtitle"></p>
+        <p class="subtitle">Sign in to your account to continue</p>
       </div>
 
       <form class="form" id="loginForm" novalidate>
@@ -328,7 +328,9 @@
       </div>
     </div>
 
-    <script>
+    <script type="module">
+      import {isAuthenticated} from "./js/auth.js";
+
       const form = document.getElementById("loginForm");
       const submitBtn = document.getElementById("submitBtn");
       const spinner = document.getElementById("spinner");
@@ -336,22 +338,6 @@
       const errorMsg = document.getElementById("errorMsg");
 
       const params = new URLSearchParams(window.location.search);
-      const client_id = params.get("client_id");
-      const redirect_uri = params.get("redirect_uri");
-
-      async function clientInfo() {
-        if (!client_id) return;
-
-        const res = await fetch(`/o/client-info?client_id=${client_id}`);
-        const data = await res.json();
-
-        if (res.ok) {
-          document.querySelector(".subtitle").innerText =
-            `Sign in to continue in ${data.name}`;
-        }
-      }
-
-      clientInfo();
 
       function showError(msg) {
         errorMsg.textContent = msg;
@@ -368,6 +354,16 @@
         btnText.textContent = loading ? "Signing in…" : "Sign in";
       }
 
+      async function checkAuth() {
+        const isAuth = await isAuthenticated();
+
+        if (isAuth) {
+          
+          window.location.href = "/";
+        }
+      }
+
+     
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
         hideError();
@@ -383,22 +379,36 @@
         setLoading(true);
 
         try {
-          // ✅ instead of fetch → use form redirect
-          const formData = new URLSearchParams({
-            email,
-            password,
-            client_id,
-            redirect_uri,
-            state: params.get("state") || "",
+          const res = await fetch("/o/authenticate/sign-in", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+              email,
+              password,
+              client_id: params.get("client_id"),
+              redirect_uri: params.get("redirect_uri"),
+              state: params.get("state"),
+              nonce: params.get("nonce"),
+            }),
           });
 
-          window.location.href = "/o/authenticate/login?" + formData.toString();
+          const data = await res.json().catch(() => ({}));
+
+          if (!res.ok) {
+            showError(data.message || "Something went wrong.");
+          } else if (data.redirect) {
+            window.location.href = data.redirect;
+          } else {
+            window.location.href = "/client-page.html";
+          }
         } catch {
           showError("Something went wrong.");
         } finally {
           setLoading(false);
         }
       });
+
+      window.addEventListener("pageshow", checkAuth);
     </script>
   </body>
 </html>

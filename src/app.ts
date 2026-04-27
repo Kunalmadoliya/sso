@@ -1,34 +1,38 @@
-import express from "express";
-import type { Express } from "express";
-import jose from "node-jose";
-import { PRIVATE_KEY, PUBLIC_KEY } from "./common/utils/cert";
-import path from "node:path";
-import db from "./db";
-import { authCodesTable, clientsTable, usersTable } from "./db/schema";
-import { eq } from "drizzle-orm";
 import crypto from "node:crypto";
-import { JWTClaims } from "./common/utils/user-token";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
+import express from "express";
+import path from "node:path";
+import {eq} from "drizzle-orm";
+import JWT from "jsonwebtoken";
+import jose from "node-jose";
+import {usersTable} from "./db/schema";
+import {PRIVATE_KEY, PUBLIC_KEY} from "./common/utils/cert";
+import type {JWTClaims} from "./common/utils/user-token";
+import db from "./db";
+import cors from "cors";
 
-export function createApp(): Express {
+export function createApp() {
   const app = express();
+  const PORT = process.env.PORT ?? 3000;
+
   app.use(express.json());
-  app.use(express.static("public"));
+  app.use(express.static(path.resolve("public")));
+  app.use(
+    cors({
+      origin: true,
+      credentials: true,
+    }),
+  );
+  app.use(require("cookie-parser")());
 
-  const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
+  app.get("/", (req, res) => res.json({message: "Hello from Auth Server"}));
 
-  app.get("/health-route", (_, res) => {
-    res.json({ message: "Server running" });
-  });
+  app.get("/health", (req, res) =>
+    res.json({message: "Server is healthy", healthy: true}),
+  );
 
-  app.get("/callback", (req, res) => {
-  res.sendFile(path.resolve("public", "callback.html"));
-});
-
-  app.get("/.well-known/openid-configuration", (_, res) => {
+  app.get("/.well-known/openid-configuration", (req, res) => {
     const ISSUER = `http://localhost:${PORT}`;
-    res.json({
+    return res.json({
       issuer: ISSUER,
       authorization_endpoint: `${ISSUER}/o/authenticate`,
       userinfo_endpoint: `${ISSUER}/o/userinfo`,
@@ -38,18 +42,19 @@ export function createApp(): Express {
 
   app.get("/.well-known/jwks.json", async (_, res) => {
     const key = await jose.JWK.asKey(PUBLIC_KEY, "pem");
-    res.json({ keys: [key.toJSON()] });
+    return res.json({keys: [key.toJSON()]});
   });
 
-  app.get("/o/authenticate", (_, res) => {
-    res.sendFile(path.resolve("public", "authenticate.html"));
+  app.get("/o/authenticate", (req, res) => {
+    return res.sendFile(path.resolve("public", "authenticate.html"));
   });
 
-  app.post("/auth/login", async (req, res) => {
-    const { email, password } = req.body;
+  app.post("/o/authenticate/sign-in", async (req, res) => {
+    const {email, password} = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: "Invalid input" });
+      res.status(400).json({message: "Email and password are required."});
+      return;
     }
 
     const [user] = await db
@@ -58,8 +63,9 @@ export function createApp(): Express {
       .where(eq(usersTable.email, email))
       .limit(1);
 
-    if (!user) {
-      return res.status(401).json({ message: "User not found" });
+    if (!user || !user.password || !user.salt) {
+      res.status(401).json({message: "Invalid email or password."});
+      return;
     }
 
     const hash = crypto
@@ -68,79 +74,67 @@ export function createApp(): Express {
       .digest("hex");
 
     if (hash !== user.password) {
-      return res.status(401).json({ message: "Wrong password" });
+      res.status(401).json({message: "Invalid email or password."});
+      return;
     }
 
-    const token = jwt.sign(
-      { sub: user.id, email: user.email },
-      PRIVATE_KEY,
-      { algorithm: "RS256", expiresIn: "1h" }
+    const ISSUER = `http://localhost:${PORT}`;
+    const now = Math.floor(Date.now() / 1000);
+
+    const claims: JWTClaims = {
+      iss: ISSUER,
+      sub: user.id,
+      email: user.email,
+      email_verified: String(user.emailVerified),
+      exp: now + 3600,
+      given_name: user.firstName ?? "",
+      family_name: user.lastName ?? undefined,
+      name: [user.firstName, user.lastName].filter(Boolean).join(" "),
+      picture: user.profileImage ?? undefined,
+    };
+
+    const token = JWT.sign(claims, PRIVATE_KEY, {algorithm: "RS256"});
+
+    const accessToken = await JWT.sign(
+      claims,
+      process.env.JWT_SECRET as string,
     );
 
-    return res.json({ token });
-  });
-
-  app.get("/o/authenticate/login", async (req, res) => {
-    const { email, password, client_id, redirect_uri, state } = req.query;
-
-    if (!email || !password || !client_id || !redirect_uri || !state) {
-      return res.status(400).send("Invalid input");
-    }
-
-
-
-    const [user] = await db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.email, email as string))
-      .limit(1);
-
-    if (!user) return res.status(401).send("User not found");
-    
-    const hash = crypto
-      .createHash("sha256")
-      .update(password + user.salt!)
-      .digest("hex");
-
-    if (hash !== user.password) {
-      return res.status(401).send("Wrong password");
-    }
-
-    const code = crypto.randomBytes(20).toString("hex");
-
-    await db.insert(authCodesTable).values({
-      code,
-      userId: user.id,
-      clientId: client_id as string,
-      expiresAt: new Date(Date.now() + 60 * 1000),
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      path: "/", // ✅ important
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    const url =
-      `${redirect_uri}?code=${code}` +
-      (state ? `&state=${state}` : "");
-
-    return res.redirect(url);
+    res.json({token});
   });
 
-  app.post("/o/authenticate/register", async (req, res) => {
-    const { firstName, lastName, email, password } = req.body;
+  app.post("/o/authenticate/sign-up", async (req, res) => {
+    const {firstName, lastName, email, password} = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ message: "Invalid input" });
+    if (!email || !password || !firstName) {
+      res
+        .status(400)
+        .json({message: "First name, email, and password are required."});
+      return;
     }
 
     const [existing] = await db
-      .select()
+      .select({id: usersTable.id})
       .from(usersTable)
       .where(eq(usersTable.email, email))
       .limit(1);
 
     if (existing) {
-      return res.status(400).json({ message: "User already exists" });
+      res
+        .status(409)
+        .json({message: "An account with this email already exists."});
+      return;
     }
 
     const salt = crypto.randomBytes(16).toString("hex");
-
     const hash = crypto
       .createHash("sha256")
       .update(password + salt)
@@ -154,35 +148,29 @@ export function createApp(): Express {
       salt,
     });
 
-    res.json({ message: "User created" });
+    res.status(201).json({ok: true});
   });
 
   app.get("/o/userinfo", async (req, res) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader?.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "Missing token" });
+      res
+        .status(401)
+        .json({message: "Missing or invalid Authorization header."});
+      return;
     }
 
-    const token = authHeader.split(" ")[1];
+    const token = authHeader.slice(7);
 
-    if(!token){
-      return res.status(404).json({error : {message : "Token not found"}})
-    }
     let claims: JWTClaims;
-
     try {
-      const decoded = jwt.verify(token, PUBLIC_KEY, {
+      claims = JWT.verify(token, PUBLIC_KEY, {
         algorithms: ["RS256"],
-      });
-
-      if (typeof decoded !== "object" || decoded === null) {
-        throw new Error();
-      }
-
-      claims = decoded as JWTClaims;
+      }) as JWTClaims;
     } catch {
-      return res.status(401).json({ message: "Invalid token" });
+      res.status(401).json({message: "Invalid or expired token."});
+      return;
     }
 
     const [user] = await db
@@ -192,7 +180,8 @@ export function createApp(): Express {
       .limit(1);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      res.status(404).json({message: "User not found."});
+      return;
     }
 
     res.json({
@@ -201,112 +190,30 @@ export function createApp(): Express {
       email_verified: user.emailVerified,
       given_name: user.firstName,
       family_name: user.lastName,
-      name: [user.firstName, user.lastName].join(" "),
+      name: [user.firstName, user.lastName].filter(Boolean).join(" "),
       picture: user.profileImage,
     });
   });
 
-  app.post("/o/token", async (req, res) => {
-    const { code, client_id, client_secret } = req.body;
+  app.get("/me", async (req, res) => {
+    const token = req.cookies?.accessToken;
 
-
-  
-    
-    if (!code || !client_id || !client_secret) {
-      return res.status(400).json({ message: "Invalid request" });
+    if (!token) {
+      return res.status(401).json({isAuth: false});
     }
 
-    const [client] = await db
-      .select()
-      .from(clientsTable)
-      .where(eq(clientsTable.clientId, client_id))
-      .limit(1);
+    try {
+      JWT.verify(token, process.env.JWT_SECRET!);
 
-    if (!client) {
-      return res.status(401).json({ message: "Invalid client" });
+      return res.json({isAuth: true});
+    } catch (error) {
+      return res.status(401).json({isAuth: false});
     }
-
-    const isValid = await bcrypt.compare(client_secret, client.clientSecret);
-    if (!isValid) {
-      return res.status(401).json({ message: "Invalid secret" });
-    }
-
-    const [authCode] = await db
-      .select()
-      .from(authCodesTable)
-      .where(eq(authCodesTable.code, code))
-      .limit(1);
-
-    if (!authCode) {
-      return res.status(400).json({ message: "Invalid code" });
-    }
-
-    const [user] = await db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.id, authCode.userId))
-      .limit(1);
-
-    if (!user) {
-      return res.status(400).json({ message: "User not found" });
-    }
-
-    const token = jwt.sign(
-      { sub: user.id, email: user.email },
-      PRIVATE_KEY,
-      { algorithm: "RS256", expiresIn: "1h" }
-    );
-
-    return res.json({
-      access_token: token,
-      token_type: "Bearer",
-    });
   });
 
-  app.post("/register-client", async (req, res) => {
-    const { name, redirectUri, appUrl } = req.body;
-
-    if (!name || !redirectUri || !appUrl) {
-      return res.status(400).json({ message: "Invalid input" });
-    }
-
-    const clientId = crypto.randomBytes(16).toString("hex");
-    const rawSecret = crypto.randomBytes(32).toString("hex");
-
-    const hashedSecret = await bcrypt.hash(rawSecret, 10);
-
-    await db.insert(clientsTable).values({
-      name,
-      clientId,
-      clientSecret: hashedSecret,
-      applicationURL: appUrl,
-      redirectUri,
-    });
-
-    return res.status(201).json({
-      clientId,
-      clientSecret: rawSecret,
-    });
-  });
-
-  app.get("/o/client-info", async (req, res) => {
-    const client_id = req.query.client_id;
-
-    if (typeof client_id !== "string") {
-      return res.status(400).json({ message: "Unauthorized service" });
-    }
-
-    const [client] = await db
-      .select()
-      .from(clientsTable)
-      .where(eq(clientsTable.clientId, client_id))
-      .limit(1);
-
-    if (!client) {
-      return res.status(404).json({ message: "Client not found" });
-    }
-
-    return res.status(200).json({ name: client.name });
+  app.post("/logout", async (req, res) => {
+    res.clearCookie("accessToken");
+    return res.status(200).json({message: "Successfully logout"});
   });
 
   return app;

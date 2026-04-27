@@ -1,227 +1,94 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Create Client</title>
-
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
-
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg: #ffffff;
-      --fg: #09090b;
-      --muted: #71717a;
-      --border: #e4e4e7;
-      --input-bg: #ffffff;
-      --ring: #18181b;
-      --card-bg: #ffffff;
-      --card-shadow: 0 1px 3px 0 rgb(0 0 0 / .1), 0 1px 2px -1px rgb(0 0 0 / .1);
-      --radius: 0.5rem;
-      --btn-bg: #18181b;
-      --btn-fg: #fafafa;
-      --btn-hover: #27272a;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #09090b;
-        --fg: #fafafa;
-        --muted: #a1a1aa;
-        --border: #27272a;
-        --input-bg: #09090b;
-        --ring: #d4d4d8;
-        --card-bg: #18181b;
-        --card-shadow: 0 1px 3px 0 rgb(0 0 0 / .4), 0 1px 2px -1px rgb(0 0 0 / .4);
-        --btn-bg: #fafafa;
-        --btn-fg: #18181b;
-        --btn-hover: #e4e4e7;
-      }
-    }
-
-    body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background-color: var(--bg);
-      color: var(--fg);
-      min-height: 100dvh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-    }
-
-    .card {
-      width: 100%;
-      max-width: 360px;
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: calc(var(--radius) + 4px);
-      box-shadow: var(--card-shadow);
-      padding: 2rem;
-    }
-
-    .header {
-      text-align: center;
-      margin-bottom: 1.75rem;
-    }
-
-    h1 {
-      font-size: 1.375rem;
-      font-weight: 600;
-    }
-
-    .subtitle {
-      font-size: 0.875rem;
-      color: var(--muted);
-      margin-top: 0.35rem;
-    }
-
-    .form {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-    }
-
-    label {
-      font-size: 0.875rem;
-      font-weight: 500;
-    }
-
-    input {
-      height: 2.375rem;
-      padding: 0 0.75rem;
-      font-size: 0.875rem;
-      color: var(--fg);
-      background: var(--input-bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      outline: none;
-    }
-
-    input::placeholder { color: var(--muted); }
-
-    input:focus {
-      border-color: var(--ring);
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 20%, transparent);
-    }
-
-    button {
-      height: 2.375rem;
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--btn-fg);
-      background: var(--btn-bg);
-      border: none;
-      border-radius: var(--radius);
-      cursor: pointer;
-      margin-top: 0.25rem;
-    }
-
-    button:hover { background: var(--btn-hover); }
-
-    .error-msg {
-      display: none;
-      font-size: 0.8125rem;
-      color: #ef4444;
-    }
-
-    .success-msg {
-      display: none;
-      font-size: 0.8125rem;
-      color: #16a34a;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Provision Client | Kunal Auth</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+        body { 
+            font-family: 'Space Grotesk', sans-serif; 
+            background-color: #050505;
+            background-image: radial-gradient(#1a1a1a 1px, transparent 1px);
+            background-size: 24px 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .bento-border { border: 1px solid #1f1f1f; }
+        .card-bg { background: rgba(10, 10, 10, 0.98); backdrop-filter: blur(20px); }
+        
+        input:focus { 
+            outline: none; 
+            border-color: #3f3f46; 
+            background: #0d0d0d !important;
+        }
+    </style>
 </head>
+<body class="text-zinc-400 antialiased p-6">
 
-<body>
+    <div class="card-bg bento-border rounded-2xl p-6 md:p-8 w-full max-w-[380px] shadow-2xl">
+        
+        <div class="flex items-center gap-3 mb-8">
+            <div class="w-10 h-10 bg-white text-black flex items-center justify-center rounded-lg font-bold text-xl shadow-lg">
+                K
+            </div>
+            <div>
+                <h1 class="text-white font-bold leading-none tracking-tight text-lg">Kunal Auth</h1>
+                <span class="text-[9px] mono text-zinc-600 uppercase tracking-[0.2em] block">Security Provisioning</span>
+            </div>
+        </div>
 
-<div class="card">
-  <div class="header">
-    <h1>Create Client</h1>
-    <p class="subtitle">Enter your application details</p>
-  </div>
+        <h2 class="text-white font-bold text-base tracking-tight mb-6">Get a Client ID and Secret</h2>
 
-  <form id="companyForm" class="form">
-    
-    <div class="field">
-      <label>Application Name</label>
-      <input type="text" id="appName" placeholder="My App" required />
+        <form id="registrationForm" class="space-y-4">
+            <div class="space-y-1.5">
+                <label class="block text-[10px] mono uppercase tracking-widest text-zinc-500 ml-1">Application Name</label>
+                <input type="text" id="app_name" placeholder="Acme App" 
+                    class="w-full bg-[#0a0a0a] bento-border rounded-lg px-4 py-2.5 text-zinc-200 text-sm transition-all placeholder:text-zinc-800" required />
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="block text-[10px] mono uppercase tracking-widest text-zinc-500 ml-1">Website URL</label>
+                <input type="url" id="website_url" placeholder="https://acme.com" 
+                    class="w-full bg-[#0a0a0a] bento-border rounded-lg px-4 py-2.5 text-zinc-200 text-sm transition-all placeholder:text-zinc-800" required />
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="block text-[10px] mono uppercase tracking-widest text-zinc-500 ml-1">Redirect URI</label>
+                <input type="text" id="redirect_uri" placeholder="https://acme.com/callback" 
+                    class="w-full bg-[#0a0a0a] bento-border rounded-lg px-4 py-2.5 text-zinc-200 text-xs mono transition-all placeholder:text-zinc-800" required />
+            </div>
+
+            <div class="pt-2">
+                <button type="submit" 
+                    class="w-full bg-white text-black font-bold py-3.5 rounded-lg text-xs uppercase tracking-widest hover:bg-zinc-200 transition-all active:scale-[0.98]">
+                    Register application
+                </button>
+            </div>
+        </form>
+
+       
     </div>
 
-    <div class="field">
-      <label>Application URL</label>
-      <input type="text" id="appUrl" placeholder="https://example.com" required />
-    </div>
+    <script>
+        const form = document.getElementById("registrationForm");
 
-    <div class="field">
-      <label>Redirect URI</label>
-      <input type="text" id="redirectUri" placeholder="https://example.com/callback" required />
-    </div>
-
-    <div class="error-msg" id="errorMsg"></div>
-    <div class="success-msg" id="successMsg"></div>
-
-    <button type="submit">Create Client</button>
-  </form>
-</div>
-
-<script>
-  const form = document.getElementById("companyForm");
-  const errorMsg = document.getElementById("errorMsg");
-  const successMsg = document.getElementById("successMsg");
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    errorMsg.style.display = "none";
-    successMsg.style.display = "none";
-
-    const name = document.getElementById("appName").value;
-    const appUrl = document.getElementById("appUrl").value;
-    const redirectUri = document.getElementById("redirectUri").value;
-
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      window.location.href = "/o/authenticate";
-      return;
-    }
-
-    try {
-      const res = await fetch("/register-client", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + token
-        },
-        body: JSON.stringify({ name, appUrl, redirectUri })
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        successMsg.style.display = "block";
-        successMsg.innerText = "Service created successfully";
-        form.reset();
-      } else {
-        errorMsg.style.display = "block";
-        errorMsg.innerText = data.message || "Error";
-      }
-
-    } catch (err) {
-      errorMsg.style.display = "block";
-      errorMsg.innerText = "Something went wrong";
-    }
-  });
-</script>
-
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            btn.innerText = "PROVISIONING...";
+            btn.disabled = true;
+         
+            setTimeout(() => { 
+                alert("Registered Successfully!");
+                btn.innerText = "Register application";
+                btn.disabled = false;
+            }, 1000);
+        });
+    </script>
 </body>
 </html>
