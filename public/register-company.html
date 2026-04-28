@@ -155,11 +155,10 @@
           });
 
           const data = await res.json();
-          console.log(data);
-          
+
           if (!res.ok) throw new Error(data?.error?.message || "Failed");
 
-          const loginURL = `http://localhost:3000/authorization?client_id=${data.client_id}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=openid%20email%20profile&state=STATE&nonce=NONCE`;
+          const loginURL = `http://localhost:3000/authorized?client_id=${data.client_id}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=openid%20email%20profile&state=STATE&nonce=NONCE`;
 
           // 🔥 Perfectly Balanced Medium Bento UI
           document.getElementById("ui-content").innerHTML = `
@@ -214,7 +213,7 @@
             </div>
 
             <div class="grid grid-cols-2 gap-3">
-              <a href="/" class="bg-white text-black text-center py-3 rounded-xl text-xs font-bold uppercase tracking-[0.1em] hover:bg-zinc-200 transition-all">
+              <a href="./client-page.html" class="bg-white text-black text-center py-3 rounded-xl text-xs font-bold uppercase tracking-[0.1em] hover:bg-zinc-200 transition-all">
                 Finish Setup
               </a>
               <button onclick="window.location.reload()" class="border border-zinc-800 text-zinc-400 py-3 rounded-xl text-xs font-bold uppercase tracking-[0.1em] hover:bg-zinc-900 hover:text-white transition-all">

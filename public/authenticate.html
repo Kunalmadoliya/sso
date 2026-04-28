@@ -329,15 +329,13 @@
     </div>
 
     <script type="module">
-      import {isAuthenticated} from "./js/auth.js";
+      import {isAuthenticated} from "/js/auth.js";
 
       const form = document.getElementById("loginForm");
       const submitBtn = document.getElementById("submitBtn");
       const spinner = document.getElementById("spinner");
       const btnText = document.getElementById("btnText");
       const errorMsg = document.getElementById("errorMsg");
-
-      const params = new URLSearchParams(window.location.search);
 
       function showError(msg) {
         errorMsg.textContent = msg;
@@ -356,14 +354,11 @@
 
       async function checkAuth() {
         const isAuth = await isAuthenticated();
-
         if (isAuth) {
-          
           window.location.href = "/";
         }
       }
 
-     
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
         hideError();
@@ -379,28 +374,35 @@
         setLoading(true);
 
         try {
-          const res = await fetch("/o/authenticate/sign-in", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({
-              email,
-              password,
-              client_id: params.get("client_id"),
-              redirect_uri: params.get("redirect_uri"),
-              state: params.get("state"),
-              nonce: params.get("nonce"),
-            }),
-          });
+          const params = new URLSearchParams(window.location.search);
+          const redirect = params.get("redirect");
+
+          const res = await fetch(
+            `/o/authenticate/sign-in${
+              redirect ? `?redirect=${encodeURIComponent(redirect)}` : ""
+            }`,
+            {
+              method: "POST",
+              headers: {"Content-Type": "application/json"},
+              credentials: "include",
+              body: JSON.stringify({email, password}),
+            },
+          );
+
+          if (res.redirected) {
+            // ✅ OAuth flow
+            window.location.href = res.url;
+            return;
+          }
 
           const data = await res.json().catch(() => ({}));
 
           if (!res.ok) {
             showError(data.message || "Something went wrong.");
-          } else if (data.redirect) {
-            window.location.href = data.redirect;
-          } else {
-            window.location.href = "/client-page.html";
+            return;
           }
+
+          window.location.href = "/client-page.html";
         } catch {
           showError("Something went wrong.");
         } finally {

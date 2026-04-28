@@ -4,12 +4,27 @@ import path from "node:path";
 import {eq, and} from "drizzle-orm";
 import JWT from "jsonwebtoken";
 import jose from "node-jose";
-import {clientsTable, usersTable} from "./db/schema.js";
+import {authCodesTable, clientsTable, usersTable} from "./db/schema.js";
 import {PRIVATE_KEY, PUBLIC_KEY} from "./common/utils/cert.js";
 import type {JWTClaims} from "./common/utils/user-token.js";
 import db from "./db/index.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import {error} from "node:console";
+
+/* ================== ✅ GLOBAL TYPES + HELPER ================== */
+
+type OAuthQuery = {
+  client_id?: string;
+  redirect_uri?: string;
+  response_type?: string;
+  state?: string;
+};
+
+const q = (v: unknown): string | undefined =>
+  typeof v === "string" ? v : undefined;
+
+/* ================== APP ================== */
 
 export function createApp() {
   const app = express();
@@ -97,22 +112,20 @@ export function createApp() {
       picture: user.profileImage ?? undefined,
     };
 
-    const token = JWT.sign(claims, PRIVATE_KEY, {algorithm: "RS256"});
-
-    const accessToken = await JWT.sign(
-      claims,
-      process.env.JWT_SECRET as string,
-    );
+    const accessToken = JWT.sign(claims, PRIVATE_KEY, {
+      algorithm: "RS256",
+    });
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: false,
       sameSite: "lax",
-      path: "/", // ✅ important
+      path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({token});
+   
+    res.json({accessToken});
   });
 
   app.post("/o/authenticate/sign-up", async (req, res) => {
@@ -156,22 +169,30 @@ export function createApp() {
   });
 
   app.get("/o/userinfo", async (req, res) => {
-    const authHeader = req.headers.authorization;
+    const authHeader = req.headers.cookie
 
-    if (!authHeader?.startsWith("Bearer ")) {
-      res
-        .status(401)
-        .json({message: "Missing or invalid Authorization header."});
-      return;
+
+
+
+
+    if (!authHeader?.startsWith("accessToken")) {
+      return res.status(401).json({error: {message: "Not authenticated"}});
+    }
+    const token = authHeader.split("=")[1];
+
+    if (!token) {
+      return res.status(401).json({error: {message: "Not authenticated"}});
     }
 
-    const token = authHeader.slice(7);
+
 
     let claims: JWTClaims;
     try {
       claims = JWT.verify(token, PUBLIC_KEY, {
         algorithms: ["RS256"],
       }) as JWTClaims;
+
+  
     } catch {
       res.status(401).json({message: "Invalid or expired token."});
       return;
@@ -199,6 +220,8 @@ export function createApp() {
     });
   });
 
+  app.get("/client-info", async (req, res) => {});
+
   app.get("/me", async (req, res) => {
     const token = req.cookies?.accessToken;
 
@@ -208,9 +231,8 @@ export function createApp() {
 
     try {
       JWT.verify(token, process.env.JWT_SECRET!);
-
       return res.json({isAuth: true});
-    } catch (error) {
+    } catch {
       return res.status(401).json({isAuth: false});
     }
   });
@@ -219,8 +241,6 @@ export function createApp() {
     res.clearCookie("accessToken");
     return res.status(200).json({message: "Successfully logout"});
   });
-
-  // <----------register-company---------------->
 
   app.post("/register-company", async (req, res) => {
     const {name, applicationURL, redirectUri} = req.body;
@@ -258,5 +278,133 @@ export function createApp() {
     res.status(200).json({client_id, client_secret});
   });
 
+  app.get("/authorized", async (req, res) => {
+    const client_id = q(req.query.client_id);
+    const redirect_uri = q(req.query.redirect_uri);
+    const response_type = q(req.query.response_type);
+    const state = q(req.query.state);
+
+    if (!client_id || !redirect_uri || response_type !== "code") {
+      return res.status(400).json({error: "Invalid request"});
+    }
+
+    const [client] = await db
+      .select()
+      .from(clientsTable)
+      .where(eq(clientsTable.clientId, client_id))
+      .limit(1);
+
+    if (!client || client.redirectUri !== redirect_uri) {
+      return res.status(400).json({error: "Invalid client"});
+    }
+
+    const token = req.cookies?.accessToken;
+
+    if (!token) {
+      return res.redirect(
+        `/o/authorized?redirect=${encodeURIComponent(req.url)}`,
+      );
+    }
+
+    const params = new URLSearchParams({
+      client_id,
+      redirect_uri,
+      ...(state && {state}),
+    });
+
+    return res.redirect(`/consent?${params.toString()}`);
+  });
+
+  app.post("/authorize/approve", async (req, res) => {
+    const {client_id, redirect_uri, state} = req.body;
+
+    const token = req.cookies?.accessToken;
+    if (!token) return res.status(401).json({error: "Not logged in"});
+
+    const decoded = JWT.verify(token, PRIVATE_KEY) as {
+      sub: string;
+    };
+
+    const code = crypto.randomBytes(16).toString("hex");
+
+    await db.insert(authCodesTable).values({
+      clientId: client_id,
+      redirectUri: redirect_uri,
+      code,
+      userId: decoded.sub,
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+    });
+
+    const redirectURL = new URL(redirect_uri);
+    redirectURL.searchParams.set("code", code);
+
+    if (state) {
+      redirectURL.searchParams.set("state", state);
+    }
+
+    res.json({redirect: redirectURL.toString()});
+  });
+
+  app.post("/token", async (req, res) => {
+    const {code, client_id, client_secret, redirect_uri} = req.body;
+
+    if (!code || !client_id || !client_secret || !redirect_uri) {
+      return res.status(400).json({error: "Missing fields"});
+    }
+
+    const [client] = await db
+      .select()
+      .from(clientsTable)
+      .where(eq(clientsTable.clientId, client_id))
+      .limit(1);
+
+    if (!client || client.clientSecret !== client_secret) {
+      return res.status(401).json({error: "Invalid client"});
+    }
+
+    const [authCode] = await db
+      .select()
+      .from(authCodesTable)
+      .where(eq(authCodesTable.code, code))
+      .limit(1);
+
+    if (!authCode) {
+      return res.status(400).json({error: "Invalid code"});
+    }
+
+    if (authCode.redirectUri !== redirect_uri) {
+      return res.status(400).json({error: "redirect_uri mismatch"});
+    }
+
+    if (new Date() > authCode.expiresAt) {
+      return res.status(400).json({error: "Code expired"});
+    }
+
+   
+    const access_token = crypto.randomBytes(32).toString("hex");
+
+    const id_token = JWT.sign(
+      {
+        sub: authCode.userId,
+        iss: "http://localhost:3000",
+        aud: client_id,
+      },
+      PRIVATE_KEY,
+      {algorithm: "RS256", expiresIn: "1h"},
+    );
+
+   
+
+    res.json({
+      access_token,
+      id_token,
+      token_type: "Bearer",
+      expires_in: 3600,
+    });
+  });
+
+  app.get("/consent", (req, res) => {
+    return res.sendFile(path.resolve("public", "consent.html"));
+  });
   return app;
 }

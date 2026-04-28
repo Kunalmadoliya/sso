@@ -305,7 +305,7 @@
         <button id="logout-btn" class="text-zinc-400 hover:text-white transition">
           Logout
         </button>
-        <a href="./authenticate.html"
+        <a href="./client-page.html"
           class="text-white bg-zinc-900 border border-zinc-800 px-4 py-2 rounded-lg hover:bg-zinc-800 transition">
           Register App
         </a>
@@ -331,7 +331,7 @@
       }
 
       async function logout() {
-        console.log("clicked");
+   
 
         await fetch("/logout", {
           method: "POST",

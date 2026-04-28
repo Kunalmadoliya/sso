@@ -7,7 +7,6 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-
 export const usersTable = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
 
@@ -19,7 +18,7 @@ export const usersTable = pgTable("users", {
   email: varchar("email", {length: 322}).notNull(),
   emailVerified: boolean("email_verified").default(false).notNull(),
 
-  password: varchar("password" , {length : 66}),
+  password: varchar("password", {length: 66}),
   salt: text("salt"),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -29,24 +28,25 @@ export const usersTable = pgTable("users", {
 export const clientsTable = pgTable("clients", {
   id: uuid("id").primaryKey().defaultRandom(),
 
-  clientId: varchar("client_id", { length: 100 }).notNull().unique(),
-  clientSecret: varchar("client_secret", { length: 100 }).notNull(),
+  clientId: varchar("client_id", {length: 100}).notNull().unique(),
+  clientSecret: varchar("client_secret", {length: 100}).notNull(),
 
-  name: varchar("name", { length: 100 }),
+  name: varchar("name", {length: 100}),
   applicationURL: text("application_url").notNull(),
   redirectUri: text("redirect_uri").notNull(),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  
 });
 
-
-
 export const authCodesTable = pgTable("auth_codes", {
-  code: varchar("code", { length: 100 }).primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
+
+  code: varchar("code", {length: 100}).notNull().unique(), 
 
   userId: uuid("user_id").notNull(),
-  clientId: varchar("client_id", { length: 100 }).notNull(),
+  clientId: varchar("client_id", {length: 100}).notNull(),
+  redirectUri: varchar("redirect_uri", {length: 255}).notNull(),
 
   expiresAt: timestamp("expires_at").notNull(),
+  consumed: boolean("consumed").default(false),
 });

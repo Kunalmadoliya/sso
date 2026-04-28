@@ -36,6 +36,13 @@
       "when": 1777355374233,
       "tag": "0004_soft_colleen_wing",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1777370670555,
+      "tag": "0005_fearless_dragon_man",
+      "breakpoints": true
     }
   ]
 }

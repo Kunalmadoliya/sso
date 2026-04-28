@@ -30,10 +30,8 @@
         border-color: #3f3f46;
         background: rgba(20, 20, 20, 0.5);
       }
-
-      /* Unified label style for headers/subtexts */
       .text-label {
-        font-size: 0.75rem; /* 12px */
+        font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 0.1em;
         font-weight: 600;
@@ -41,6 +39,7 @@
       }
     </style>
   </head>
+
   <body class="text-zinc-400 antialiased py-8 px-4 sm:px-8">
     <div class="max-w-7xl mx-auto space-y-6">
       <nav
@@ -53,13 +52,17 @@
             K
           </div>
           <div class="hidden sm:block">
-            <h1 class="text-white font-bold leading-none text-base">
+            <h1
+              id="appTitle"
+              class="text-white font-bold leading-none text-base"
+            >
               Kunal Auth
             </h1>
             <span
               class="text-xs mono text-zinc-600 uppercase tracking-wider block mt-1"
-              >Console v2</span
             >
+              Console v2
+            </span>
           </div>
         </div>
 
@@ -67,6 +70,7 @@
           <a href="#" class="text-white border-b-2 border-white pb-0.5">Apps</a>
 
           <button
+            id="logoutBtn"
             onclick="logout()"
             class="bg-zinc-900 px-4 py-2 rounded-lg text-zinc-400 hover:text-red-400 bento-border transition"
           >
@@ -81,14 +85,19 @@
             class="card-bg bento-border rounded-2xl p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
           >
             <div>
-              <h2 class="text-3xl font-bold text-white tracking-tight">
+              <h2
+                id="sectionTitle"
+                class="text-3xl font-bold text-white tracking-tight"
+              >
                 Active Clients
               </h2>
-              <p class="text-sm text-zinc-500 mt-1">
+              <p id="sectionDesc" class="text-sm text-zinc-500 mt-1">
                 Manage your OAuth 2.0 application credentials and scopes.
               </p>
             </div>
+
             <a
+              id="newAppBtn"
               href="./register-company.html"
               class="bg-white text-black text-xs font-bold uppercase tracking-wider px-5 py-3 rounded-lg hover:bg-zinc-200 transition-all flex items-center gap-2 shadow-lg hover:scale-[1.02]"
             >
@@ -101,6 +110,7 @@
             id="apps-container"
           >
             <div
+              id="appCard"
               class="card-bg bento-border rounded-2xl p-6 app-card transition-all cursor-pointer group"
             >
               <div class="flex justify-between items-start mb-6">
@@ -121,22 +131,33 @@
                     ></path>
                   </svg>
                 </div>
+
                 <span
+                  id="appStatus"
                   class="text-xs mono px-2.5 py-1 bg-emerald-500/10 text-emerald-500 rounded-full border border-emerald-500/20 font-bold uppercase tracking-wider"
-                  >Live</span
                 >
+                  Live
+                </span>
               </div>
-              <h3 class="text-white font-bold text-lg mb-1">E-commerce API</h3>
-              <p class="text-xs text-zinc-600 mono truncate mb-6">
+
+              <h3 id="appName" class="text-white font-bold text-lg mb-1">
+                E-commerce API
+              </h3>
+
+              <p id="appId" class="text-xs text-zinc-600 mono truncate mb-6">
                 ID: 8291...x92
               </p>
+
               <div class="grid grid-cols-2 gap-3">
                 <button
+                  id="settingsBtn"
                   class="text-label mono py-2.5 bg-zinc-900 rounded-lg bento-border hover:text-white transition text-center"
                 >
                   Settings
                 </button>
+
                 <button
+                  id="revokeBtn"
                   class="text-label mono py-2.5 bg-zinc-900 rounded-lg bento-border hover:text-red-500 transition text-center"
                 >
                   Revoke
@@ -155,72 +176,57 @@
         <div class="col-span-12 lg:col-span-4 space-y-6">
           <div class="card-bg bento-border rounded-2xl p-6">
             <p class="text-label mono mb-6">Operator Identity</p>
+
             <div class="flex items-center gap-4 mb-6">
               <div
                 class="w-14 h-14 bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-xl bento-border shadow-lg"
               ></div>
+
               <div class="overflow-hidden">
-                <p class="text-white font-bold truncate">Kunal Madoliya</p>
-                <p class="text-xs mono text-zinc-600 truncate">
+                <p id="userName" class="text-white font-bold truncate">
+                  Kunal Madoliya
+                </p>
+                <p id="userEmail" class="text-xs mono text-zinc-600 truncate">
                   hello@gmail.com
                 </p>
-              </div>
-            </div>
-            <button
-              class="w-full py-3 bg-zinc-900 bento-border rounded-xl text-label mono hover:text-white transition"
-            >
-              Account Settings
-            </button>
-          </div>
-
-          <div class="card-bg bento-border rounded-2xl p-6">
-            <p class="text-label mono mb-6">System Health</p>
-            <div class="space-y-4">
-              <div class="flex justify-between items-center text-xs">
-                <span class="font-medium">API Uptime</span>
-                <span class="text-white mono font-bold">99.9%</span>
-              </div>
-              <div
-                class="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden shadow-inner"
-              >
-                <div
-                  class="bg-emerald-500 h-full w-[99%] shadow-[0_0_8px_#10b981]"
-                ></div>
-              </div>
-              <div class="flex justify-between items-center text-xs pt-2">
-                <span class="font-medium">Active Tokens</span>
-                <span class="text-white mono font-bold">242</span>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      <footer
-        class="card-bg bento-border rounded-xl p-5 flex flex-col md:flex-row justify-between items-center gap-4"
-      >
-        <div class="flex items-center gap-5 text-label mono">
-          <span>Protocol: <span class="text-white">v2.0-OIDC</span></span>
-          <span class="text-zinc-800">/</span>
-          <span>Region: <span class="text-white">Global</span></span>
-        </div>
-        <div class="flex items-center gap-3">
-          <div
-            class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_#10b981]"
-          ></div>
-          <span class="text-label mono text-white"
-            >System Fully Operational</span
-          >
-        </div>
-      </footer>
+      <!-- grid end -->
     </div>
+    <!-- 🔥 FIX: THIS WAS MISSING -->
 
     <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const appName = document.getElementById("appName")?.innerText;
+        const appId = document.getElementById("appId")?.innerText;
+        const userName = document.getElementById("userName")?.innerText;
+        const userEmail = document.getElementById("userEmail")?.innerText;
+
+        async function fetchData() {
+          try {
+            const res = await fetch("/o/userinfo", {
+              method: "GET",
+              credentials: "include", 
+            });
+
+            const data = await res.json();
+       
+          } catch (error) {
+            console.error(error);
+          }
+        }
+
+        fetchData();
+      });
+
       async function logout() {
         try {
           await fetch("/logout", {method: "POST"});
           window.location.href = "/";
-        } catch (e) {
+        } catch {
           window.location.href = "/";
         }
       }

@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Authorize | Kunal Auth</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Space Grotesk", sans-serif;
+        background-color: #050505;
+        background-image: radial-gradient(#1a1a1a 1px, transparent 1px);
+        background-size: 24px 24px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
+      .mono {
+        font-family: "JetBrains Mono", monospace;
+      }
+      .bento-border {
+        border: 1px solid #1f1f1f;
+      }
+      .card-bg {
+        background: rgba(10, 10, 10, 0.98);
+        backdrop-filter: blur(20px);
+      }
+
+      .scope-pill {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid #1f1f1f;
+        transition: all 0.2s ease;
+      }
+      .scope-pill:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: #333;
+      }
+    </style>
+  </head>
+  <body class="text-zinc-400 antialiased p-6">
+    <div
+      class="card-bg bento-border rounded-[2rem] p-8 w-full max-w-lg shadow-2xl"
+    >
+      <div class="flex justify-between items-center mb-10">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 bg-white text-black flex items-center justify-center rounded-xl font-bold text-xl shadow-lg"
+          >
+            K
+          </div>
+          <div>
+            <h1
+              class="text-white font-bold leading-none tracking-tight text-lg"
+            >
+              Kunal Auth
+            </h1>
+            <span
+              class="text-[9px] mono text-zinc-600 uppercase tracking-[0.2em] block mt-0.5"
+              >Secure Authorization</span
+            >
+          </div>
+        </div>
+        <div
+          class="text-[10px] mono text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 uppercase tracking-widest"
+        >
+          Encrypted
+        </div>
+      </div>
+
+      <div class="mb-8 text-center md:text-left">
+        <h2 class="text-white font-bold text-2xl tracking-tight mb-2">
+          Approve Access
+        </h2>
+        <p class="text-zinc-500 text-sm">
+          <span class="text-white font-medium">1millioncheckbox</span> is
+          requesting permission to access your account data.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
+        <div
+          class="bento-border bg-white/[0.02] rounded-2xl p-5 flex flex-col justify-center"
+        >
+          <p
+            class="text-[10px] mono uppercase text-zinc-600 mb-2 tracking-wider"
+          >
+            Requesting App
+          </p>
+          <p class="text-white font-bold text-lg tracking-tight truncate">
+            1millioncheckbox
+          </p>
+          <p class="text-[10px] mono text-zinc-500 truncate mt-1 italic">
+            localhost:3000
+          </p>
+        </div>
+
+        <div
+          class="bento-border bg-white/[0.02] rounded-2xl p-5 flex flex-col justify-center"
+        >
+          <p
+            class="text-[10px] mono uppercase text-zinc-600 mb-2 tracking-wider"
+          >
+            Verified Source
+          </p>
+          <div class="flex items-center gap-2">
+            <div
+              class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"
+            ></div>
+            <p class="text-zinc-200 font-medium text-sm">Trusted Client</p>
+          </div>
+        </div>
+
+        <div class="md:col-span-2 bento-border bg-zinc-900/40 rounded-2xl p-6">
+          <p
+            class="text-[10px] mono uppercase text-zinc-500 mb-4 tracking-widest"
+          >
+            Requested Permissions
+          </p>
+
+          <div class="space-y-3">
+            <div class="flex items-center gap-4 p-3 rounded-xl scope-pill">
+              <div
+                class="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 text-xs"
+              >
+                ID
+              </div>
+              <div>
+                <p class="text-zinc-200 text-sm font-bold mono">openid</p>
+                <p class="text-[10px] text-zinc-500">
+                  Verify your identity with this service.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-4 p-3 rounded-xl scope-pill">
+              <div
+                class="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 text-xs"
+              >
+                @
+              </div>
+              <div>
+                <p class="text-zinc-200 text-sm font-bold mono">email</p>
+                <p class="text-[10px] text-zinc-500">
+                  Access your primary email address.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-4 p-3 rounded-xl scope-pill">
+              <div
+                class="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 text-xs"
+              >
+                👤
+              </div>
+              <div>
+                <p class="text-zinc-200 text-sm font-bold mono">profile</p>
+                <p class="text-[10px] text-zinc-500">
+                  Access personal info (Name, Photo).
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col md:flex-row gap-3">
+        <button
+          id="allowBtn"
+          class="flex-1 bg-white text-black py-4 rounded-xl text-xs font-bold uppercase tracking-[0.2em] hover:bg-zinc-200 transition-all shadow-xl active:scale-95"
+        >
+          Allow Access
+        </button>
+
+        <button
+          id="denyBtn"
+          class="flex-1 border border-zinc-800 text-zinc-500 py-4 rounded-xl text-xs font-bold uppercase tracking-[0.2em] hover:bg-zinc-900 hover:text-white transition-all active:scale-95"
+        >
+          Deny
+        </button>
+      </div>
+
+      <p
+        class="text-center text-[10px] text-zinc-600 mt-8 mono uppercase tracking-tight"
+      >
+        Redirecting to:
+        <span class="text-zinc-500">localhost:3000/callback</span>
+      </p>
+    </div>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+
+      const client_id = params.get("client_id");
+      const redirect_uri = params.get("redirect_uri");
+      const state = params.get("state");
+
+      async function approve() {
+        try {
+          const res = await fetch("/authorize/approve", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+              client_id,
+              redirect_uri,
+              state,
+            }),
+          });
+
+          const data = await res.json();
+
+     
+
+          if (!res.ok) {
+            alert(data.error || "Approval failed");
+            return;
+          }
+
+          if (!res.ok) {
+            alert(data.error || "Approval failed");
+            return;
+          }
+
+          window.location.replace(data.redirect);
+        } catch (err) {
+          console.error(err);
+          alert("Something went wrong");
+        }
+      }
+
+      // 🔥 Deny button handler
+      function deny() {
+        if (!redirect_uri) return;
+
+        let url = redirect_uri + "?error=access_denied";
+
+        if (state) {
+          url += "&state=" + state;
+        }
+
+        window.location.replace(url);
+      }
+
+      // 🔥 attach buttons AFTER DOM loads
+      document.addEventListener("DOMContentLoaded", () => {
+        const allowBtn = document.getElementById("allowBtn");
+        const denyBtn = document.getElementById("denyBtn");
+
+        allowBtn.addEventListener("click", approve);
+        denyBtn.addEventListener("click", deny);
+      });
+    </script>
+  </body>
+</html>

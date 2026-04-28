@@ -1,5 +1,0 @@
-http://localhost:3000/authorization?client_id=a6c27f8c5dc86a3c3fc0b3792def8cd9&redirect_uri=https%3A%2F%2Fx.com%2Fhome%2Fauth%2Fcallback&response_type=code&scope=openid%20email%20profile&state=STATE&nonce=NONCE
-
-
-
-https://alok-auth.vercel.app/authorization?client_id=XMVMlQlCRNsFbcBumhl9Ew&redirect_uri=https%3A%2F%2Fx.com%2Fhome%2Fauth%2Fcallback&response_type=code&scope=openid+email+profile&state=STATE_PLACEHOLDER&nonce=NONCE_PLACEHOLDER
