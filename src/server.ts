@@ -1,6 +1,6 @@
 import "dotenv/config";
 import {createServer} from "node:http";
-import { createApp } from "./app";
+import { createApp } from "./app.js";
 
 async function main() {
   try {

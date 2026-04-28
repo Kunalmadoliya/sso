@@ -87,7 +87,7 @@
             <input
               type="text"
               id="app_name"
-              placeholder="Acme App"
+              placeholder="kunal App"
               class="w-full bg-[#0a0a0a] bento-border rounded-lg px-4 py-2.5 text-zinc-200 text-sm"
               required
             />
@@ -101,7 +101,7 @@
             <input
               type="url"
               id="website_url"
-              placeholder="https://acme.com"
+              placeholder="https://kunal.com"
               class="w-full bg-[#0a0a0a] bento-border rounded-lg px-4 py-2.5 text-zinc-200 text-sm"
               required
             />
@@ -115,7 +115,7 @@
             <input
               type="text"
               id="redirect_uri"
-              placeholder="https://acme.com/callback"
+              placeholder="https://kunal.com/callback"
               class="w-full bg-[#0a0a0a] bento-border rounded-lg px-4 py-2.5 text-zinc-200 text-xs mono"
               required
             />
@@ -155,6 +155,8 @@
           });
 
           const data = await res.json();
+          console.log(data);
+          
           if (!res.ok) throw new Error(data?.error?.message || "Failed");
 
           const loginURL = `http://localhost:3000/authorization?client_id=${data.client_id}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=openid%20email%20profile&state=STATE&nonce=NONCE`;

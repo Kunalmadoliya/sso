@@ -4,25 +4,29 @@ import path from "node:path";
 import {eq, and} from "drizzle-orm";
 import JWT from "jsonwebtoken";
 import jose from "node-jose";
-import {clientsTable, usersTable} from "./db/schema";
-import {PRIVATE_KEY, PUBLIC_KEY} from "./common/utils/cert";
-import type {JWTClaims} from "./common/utils/user-token";
-import db from "./db";
+import {clientsTable, usersTable} from "./db/schema.js";
+import {PRIVATE_KEY, PUBLIC_KEY} from "./common/utils/cert.js";
+import type {JWTClaims} from "./common/utils/user-token.js";
+import db from "./db/index.js";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 export function createApp() {
   const app = express();
+  app.use(express.json());
   const PORT = process.env.PORT ?? 3000;
 
   app.use(express.json());
-  app.use(express.static(path.resolve("public")));
+
   app.use(
     cors({
       origin: true,
       credentials: true,
     }),
   );
-  app.use(require("cookie-parser")());
+  app.use(cookieParser());
+
+  app.use(express.static(path.resolve("public")));
 
   app.get("/", (req, res) => res.json({message: "Hello from Auth Server"}));
 
@@ -253,5 +257,6 @@ export function createApp() {
 
     res.status(200).json({client_id, client_secret});
   });
+
   return app;
 }
