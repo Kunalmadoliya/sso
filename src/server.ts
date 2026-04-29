@@ -9,7 +9,7 @@ async function main() {
     const server = createServer(createApp());
 
     server.listen(PORT, () => {
-        console.log("Server is running on PORT" , PORT);
+        console.log("Server is running on PORT" , `http://localhost:${PORT}`);
     });
     
   } catch (error) {

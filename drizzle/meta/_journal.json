@@ -43,6 +43,13 @@
       "when": 1777370670555,
       "tag": "0005_fearless_dragon_man",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1777461723744,
+      "tag": "0006_slimy_spot",
+      "breakpoints": true
     }
   ]
 }

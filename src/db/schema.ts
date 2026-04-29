@@ -35,13 +35,14 @@ export const clientsTable = pgTable("clients", {
   applicationURL: text("application_url").notNull(),
   redirectUri: text("redirect_uri").notNull(),
 
+  userId: uuid("user_id"), // ✅ added
+
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
-
 export const authCodesTable = pgTable("auth_codes", {
   id: uuid("id").primaryKey().defaultRandom(),
 
-  code: varchar("code", {length: 100}).notNull().unique(), 
+  code: varchar("code", {length: 100}).notNull().unique(),
 
   userId: uuid("user_id").notNull(),
   clientId: varchar("client_id", {length: 100}).notNull(),

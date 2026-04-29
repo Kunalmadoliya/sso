@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import express from "express";
+import express, {application} from "express";
 import path from "node:path";
 import {eq, and} from "drizzle-orm";
 import JWT from "jsonwebtoken";
@@ -10,7 +10,6 @@ import type {JWTClaims} from "./common/utils/user-token.js";
 import db from "./db/index.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import {error} from "node:console";
 
 /* ================== ✅ GLOBAL TYPES + HELPER ================== */
 
@@ -124,7 +123,6 @@ export function createApp() {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-   
     res.json({accessToken});
   });
 
@@ -169,11 +167,7 @@ export function createApp() {
   });
 
   app.get("/o/userinfo", async (req, res) => {
-    const authHeader = req.headers.cookie
-
-
-
-
+    const authHeader = req.headers.cookie;
 
     if (!authHeader?.startsWith("accessToken")) {
       return res.status(401).json({error: {message: "Not authenticated"}});
@@ -184,15 +178,11 @@ export function createApp() {
       return res.status(401).json({error: {message: "Not authenticated"}});
     }
 
-
-
     let claims: JWTClaims;
     try {
       claims = JWT.verify(token, PUBLIC_KEY, {
         algorithms: ["RS256"],
       }) as JWTClaims;
-
-  
     } catch {
       res.status(401).json({message: "Invalid or expired token."});
       return;
@@ -249,6 +239,13 @@ export function createApp() {
       return res.status(401).json({error: {message: "Enter all feilds"}});
     }
 
+    const token = req.cookies?.accessToken;
+    if (!token) return res.status(401).json({error: "Not logged in"});
+
+    const decoded = JWT.verify(token, PRIVATE_KEY) as {
+      sub: string;
+    };
+
     const [existingCompany] = await db
       .select()
       .from(clientsTable)
@@ -271,6 +268,7 @@ export function createApp() {
       clientId: client_id,
       clientSecret: client_secret,
       name: name,
+      userId: decoded.sub,
       applicationURL: applicationURL,
       redirectUri: redirectUri,
     });
@@ -380,7 +378,6 @@ export function createApp() {
       return res.status(400).json({error: "Code expired"});
     }
 
-   
     const access_token = crypto.randomBytes(32).toString("hex");
 
     const id_token = JWT.sign(
@@ -393,8 +390,6 @@ export function createApp() {
       {algorithm: "RS256", expiresIn: "1h"},
     );
 
-   
-
     res.json({
       access_token,
       id_token,
@@ -405,6 +400,56 @@ export function createApp() {
 
   app.get("/consent", (req, res) => {
     return res.sendFile(path.resolve("public", "consent.html"));
+  });
+
+  app.get("/getall-apps", async (req, res) => {
+    const authHeader = req.headers.cookie;
+
+    if (!authHeader?.startsWith("accessToken")) {
+      return res.status(401).json({error: {message: "Not authenticated"}});
+    }
+    const token = authHeader.split("=")[1];
+   
+
+    if (!token) {
+      return res.status(401).json({error: {message: "Not authenticated"}});
+    }
+
+    let claims: JWTClaims;
+    try {
+      claims = JWT.verify(token, PUBLIC_KEY, {
+        algorithms: ["RS256"],
+      }) as JWTClaims;
+
+
+    } catch {
+      res.status(401).json({message: "Invalid or expired token."});
+      return;
+    }
+
+    const results = await db
+      .select({
+        userId: usersTable.id,
+        email: usersTable.email,
+        firstName: usersTable.firstName,
+        lastName: usersTable.lastName,
+
+        clientId: clientsTable.clientId,
+        appName: clientsTable.name,
+        redirectUri: clientsTable.redirectUri,
+        applicationURL: clientsTable.applicationURL,
+      })
+      .from(usersTable)
+      .leftJoin(clientsTable, eq(usersTable.id, clientsTable.userId))
+      .where(eq(usersTable.id, claims.sub));
+
+    if (!results) {
+      return res.status(401).json({error: {message: "User not found"}});
+    }
+
+
+
+    res.status(200).json({results});
   });
   return app;
 }
