@@ -39,8 +39,10 @@ export function createApp() {
 
   app.use(
     cors({
-      origin: true,
+      origin: "https://kunal-auth.vercel.app",
       credentials: true,
+      methods: ["GET", "POST", "OPTIONS"],
+      allowedHeaders: ["Content-Type"],
     }),
   );
   app.use(cookieParser());
@@ -54,7 +56,7 @@ export function createApp() {
   );
 
   app.get("/.well-known/openid-configuration", (req, res) => {
-    const ISSUER = process.env.BASE_URL
+    const ISSUER = process.env.BASE_URL;
 
     return res.json({
       issuer: ISSUER,
@@ -123,8 +125,8 @@ export function createApp() {
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      secure: true,
+      sameSite: "none",
       path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
