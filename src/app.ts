@@ -45,6 +45,8 @@ export function createApp() {
       allowedHeaders: ["Content-Type"],
     }),
   );
+
+  app.options("*", cors());
   app.use(cookieParser());
 
   app.use(express.static(path.resolve("public")));
