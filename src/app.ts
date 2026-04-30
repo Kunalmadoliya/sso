@@ -4,7 +4,12 @@ import path from "node:path";
 import {eq, and} from "drizzle-orm";
 import JWT from "jsonwebtoken";
 import jose from "node-jose";
-import {authCodesTable, clientsTable, usersTable} from "./db/schema.js";
+import {
+  authCodesTable,
+  clientsTable,
+  usersTable,
+  consentsTable,
+} from "./db/schema.js";
 import {PRIVATE_KEY, PUBLIC_KEY} from "./common/utils/cert.js";
 import type {JWTClaims} from "./common/utils/user-token.js";
 import db from "./db/index.js";
@@ -52,7 +57,7 @@ export function createApp() {
     const ISSUER = `http://localhost:${PORT}`;
     return res.json({
       issuer: ISSUER,
-      authorization_endpoint: `${ISSUER}/o/authenticate`,
+      authorization_endpoint: `${ISSUER}/oauth/authorize`,
       userinfo_endpoint: `${ISSUER}/o/userinfo`,
       jwks_uri: `${ISSUER}/.well-known/jwks.json`,
     });
@@ -69,10 +74,12 @@ export function createApp() {
 
   app.post("/o/authenticate/sign-in", async (req, res) => {
     const {email, password} = req.body;
+    const redirect = req.body.redirect || req.query.redirect;
 
     if (!email || !password) {
-      res.status(400).json({message: "Email and password are required."});
-      return;
+      return res
+        .status(400)
+        .json({message: "Email and password are required."});
     }
 
     const [user] = await db
@@ -82,8 +89,7 @@ export function createApp() {
       .limit(1);
 
     if (!user || !user.password || !user.salt) {
-      res.status(401).json({message: "Invalid email or password."});
-      return;
+      return res.status(401).json({message: "Invalid email or password."});
     }
 
     const hash = crypto
@@ -92,14 +98,13 @@ export function createApp() {
       .digest("hex");
 
     if (hash !== user.password) {
-      res.status(401).json({message: "Invalid email or password."});
-      return;
+      return res.status(401).json({message: "Invalid email or password."});
     }
 
     const ISSUER = `http://localhost:${PORT}`;
     const now = Math.floor(Date.now() / 1000);
 
-    const claims: JWTClaims = {
+    const claims = {
       iss: ISSUER,
       sub: user.id,
       email: user.email,
@@ -123,7 +128,13 @@ export function createApp() {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({accessToken});
+    // 🔥 CORE LOGIC
+    if (redirect) {
+      return res.redirect(redirect); // OAuth flow
+    }
+
+    // 🔥 NORMAL LOGIN
+    return res.redirect("/client-page.html");
   });
 
   app.post("/o/authenticate/sign-up", async (req, res) => {
@@ -220,7 +231,7 @@ export function createApp() {
     }
 
     try {
-      JWT.verify(token, process.env.JWT_SECRET!);
+      JWT.verify(token, PUBLIC_KEY);
       return res.json({isAuth: true});
     } catch {
       return res.status(401).json({isAuth: false});
@@ -276,7 +287,7 @@ export function createApp() {
     res.status(200).json({client_id, client_secret});
   });
 
-  app.get("/authorized", async (req, res) => {
+  app.get("/oauth/authorize", async (req, res) => {
     const client_id = q(req.query.client_id);
     const redirect_uri = q(req.query.redirect_uri);
     const response_type = q(req.query.response_type);
@@ -289,8 +300,7 @@ export function createApp() {
     const [client] = await db
       .select()
       .from(clientsTable)
-      .where(eq(clientsTable.clientId, client_id))
-      .limit(1);
+      .where(eq(clientsTable.clientId, client_id));
 
     if (!client || client.redirectUri !== redirect_uri) {
       return res.status(400).json({error: "Invalid client"});
@@ -299,48 +309,83 @@ export function createApp() {
     const token = req.cookies?.accessToken;
 
     if (!token) {
+      const redirect = `/oauth/authorize?client_id=${client_id}&redirect_uri=${encodeURIComponent(
+        redirect_uri,
+      )}&response_type=code${state ? `&state=${state}` : ""}`;
+
       return res.redirect(
-        `/o/authorized?redirect=${encodeURIComponent(req.url)}`,
+        `/o/authenticate?redirect=${encodeURIComponent(redirect)}`,
       );
     }
 
-    const params = new URLSearchParams({
-      client_id,
-      redirect_uri,
-      ...(state && {state}),
-    });
+    const decoded = JWT.verify(token, PUBLIC_KEY) as {sub: string};
 
-    return res.redirect(`/consent?${params.toString()}`);
+    const [consent] = await db
+      .select()
+      .from(consentsTable)
+      .where(
+        and(
+          eq(consentsTable.userId, decoded.sub),
+          eq(consentsTable.clientId, client_id),
+        ),
+      );
+
+    if (consent?.isVerified) {
+      const code = crypto.randomBytes(16).toString("hex");
+
+      await db.insert(authCodesTable).values({
+        code,
+        clientId: client_id,
+        userId: decoded.sub,
+        redirectUri: redirect_uri,
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      });
+
+      const url = new URL(redirect_uri);
+      url.searchParams.set("code", code);
+      if (state) url.searchParams.set("state", state);
+
+      return res.redirect(url.toString());
+    }
+
+    return res.redirect(
+      `/consent?client_id=${client_id}&redirect_uri=${redirect_uri}&state=${state}`,
+    );
   });
 
-  app.post("/authorize/approve", async (req, res) => {
+  app.post("/oauth/consent", async (req, res) => {
     const {client_id, redirect_uri, state} = req.body;
 
     const token = req.cookies?.accessToken;
     if (!token) return res.status(401).json({error: "Not logged in"});
 
-    const decoded = JWT.verify(token, PRIVATE_KEY) as {
-      sub: string;
-    };
+    const decoded = JWT.verify(token, PUBLIC_KEY) as {sub: string};
+
+    // ✅ SAVE CONSENT
+    await db
+      .insert(consentsTable)
+      .values({
+        userId: decoded.sub,
+        clientId: client_id,
+        isVerified: true,
+      })
+      .onConflictDoNothing();
 
     const code = crypto.randomBytes(16).toString("hex");
 
     await db.insert(authCodesTable).values({
-      clientId: client_id,
-      redirectUri: redirect_uri,
       code,
+      clientId: client_id,
       userId: decoded.sub,
+      redirectUri: redirect_uri,
       expiresAt: new Date(Date.now() + 5 * 60 * 1000),
     });
 
-    const redirectURL = new URL(redirect_uri);
-    redirectURL.searchParams.set("code", code);
+    const url = new URL(redirect_uri);
+    url.searchParams.set("code", code);
+    if (state) url.searchParams.set("state", state);
 
-    if (state) {
-      redirectURL.searchParams.set("state", state);
-    }
-
-    res.json({redirect: redirectURL.toString()});
+    res.json({redirect: url.toString()});
   });
 
   app.post("/token", async (req, res) => {
@@ -366,9 +411,14 @@ export function createApp() {
       .where(eq(authCodesTable.code, code))
       .limit(1);
 
-    if (!authCode) {
+    if (!authCode || authCode.consumed) {
       return res.status(400).json({error: "Invalid code"});
     }
+
+    await db
+      .update(authCodesTable)
+      .set({consumed: true})
+      .where(eq(authCodesTable.code, code));
 
     if (authCode.redirectUri !== redirect_uri) {
       return res.status(400).json({error: "redirect_uri mismatch"});
@@ -409,7 +459,6 @@ export function createApp() {
       return res.status(401).json({error: {message: "Not authenticated"}});
     }
     const token = authHeader.split("=")[1];
-   
 
     if (!token) {
       return res.status(401).json({error: {message: "Not authenticated"}});
@@ -420,8 +469,6 @@ export function createApp() {
       claims = JWT.verify(token, PUBLIC_KEY, {
         algorithms: ["RS256"],
       }) as JWTClaims;
-
-
     } catch {
       res.status(401).json({message: "Invalid or expired token."});
       return;
@@ -446,8 +493,6 @@ export function createApp() {
     if (!results) {
       return res.status(401).json({error: {message: "User not found"}});
     }
-
-
 
     res.status(200).json({results});
   });

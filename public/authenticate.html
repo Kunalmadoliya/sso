@@ -329,88 +329,172 @@
     </div>
 
     <script type="module">
-      import {isAuthenticated} from "/js/auth.js";
+      document.addEventListener("DOMContentLoaded", () => {
+        const form = document.getElementById("loginForm");
+        const submitBtn = document.getElementById("submitBtn");
+        const spinner = document.getElementById("spinner");
+        const btnText = document.getElementById("btnText");
+        const errorMsg = document.getElementById("errorMsg");
+        const toggleLink = document.getElementById("toggleLink");
 
-      const form = document.getElementById("loginForm");
-      const submitBtn = document.getElementById("submitBtn");
-      const spinner = document.getElementById("spinner");
-      const btnText = document.getElementById("btnText");
-      const errorMsg = document.getElementById("errorMsg");
+        let isSignUp = false;
 
-      function showError(msg) {
-        errorMsg.textContent = msg;
-        errorMsg.style.display = "block";
-      }
-
-      function hideError() {
-        errorMsg.style.display = "none";
-      }
-
-      function setLoading(loading) {
-        submitBtn.disabled = loading;
-        spinner.style.display = loading ? "block" : "none";
-        btnText.textContent = loading ? "Signing in…" : "Sign in";
-      }
-
-      async function checkAuth() {
-        const isAuth = await isAuthenticated();
-        if (isAuth) {
-          window.location.href = "/";
-        }
-      }
-
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        hideError();
-
-        const email = document.getElementById("email").value.trim();
-        const password = document.getElementById("password").value;
-
-        if (!email || !password) {
-          showError("Please fill in all fields.");
-          return;
+        function showError(msg) {
+          errorMsg.textContent = msg;
+          errorMsg.style.display = "block";
         }
 
-        setLoading(true);
+        function hideError() {
+          errorMsg.style.display = "none";
+        }
 
-        try {
+        function setLoading(loading) {
+          submitBtn.disabled = loading;
+          spinner.style.display = loading ? "block" : "none";
+          btnText.textContent = loading
+            ? isSignUp
+              ? "Creating account…"
+              : "Signing in…"
+            : isSignUp
+              ? "Sign up"
+              : "Sign in";
+        }
+
+        // ✅ safe toggle (no crash if missing)
+        if (toggleLink) {
+          toggleLink.addEventListener("click", (e) => {
+            e.preventDefault();
+            isSignUp = !isSignUp;
+            hideError();
+          });
+        }
+
+        // 🔥 Persist redirect across OAuth
+        function getRedirectUri() {
           const params = new URLSearchParams(window.location.search);
           const redirect = params.get("redirect");
 
-          const res = await fetch(
-            `/o/authenticate/sign-in${
-              redirect ? `?redirect=${encodeURIComponent(redirect)}` : ""
-            }`,
-            {
+          if (redirect) {
+            sessionStorage.setItem("oauth_redirect", redirect);
+            return redirect;
+          }
+
+          return sessionStorage.getItem("oauth_redirect");
+        }
+
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          hideError();
+
+          let endpoint, payload;
+
+          if (isSignUp) {
+            const firstName = document
+              .getElementById("signup-firstName")
+              ?.value.trim();
+            const lastName = document
+              .getElementById("signup-lastName")
+              ?.value.trim();
+            const email = document.getElementById("signup-email")?.value.trim();
+            const password = document.getElementById("signup-password")?.value;
+
+            if (!email || !password || !firstName) {
+              showError("Please fill in all required fields.");
+              return;
+            }
+
+            endpoint = "/o/authenticate/sign-up";
+            payload = {firstName, lastName, email, password};
+          } else {
+            const email = document.getElementById("email")?.value.trim();
+            const password = document.getElementById("password")?.value;
+
+            if (!email || !password) {
+              showError("Please fill in all fields.");
+              return;
+            }
+
+            endpoint = "/o/authenticate/sign-in";
+            const redirect = getRedirectUri();
+            payload = {email, password, redirect};
+          }
+
+          setLoading(true);
+
+          try {
+            const res = await fetch(endpoint, {
               method: "POST",
               headers: {"Content-Type": "application/json"},
               credentials: "include",
-              body: JSON.stringify({email, password}),
-            },
-          );
+              body: JSON.stringify(payload),
+            });
 
-          if (res.redirected) {
-            // ✅ OAuth flow
-            window.location.href = res.url;
-            return;
+            // 🔥 HANDLE BACKEND REDIRECT (CRITICAL)
+            if (res.redirected) {
+              sessionStorage.removeItem("oauth_redirect");
+              window.location.href = res.url;
+              return;
+            }
+
+            const data = await res.json();
+
+            if (!res.ok) {
+              showError(data.message || "Something went wrong.");
+              return;
+            }
+
+            // 🔥 SIGNUP FLOW (FIXED)
+            if (isSignUp) {
+              const redirect = getRedirectUri();
+
+              if (redirect) {
+                const signInRes = await fetch("/o/authenticate/sign-in", {
+                  method: "POST",
+                  headers: {"Content-Type": "application/json"},
+                  credentials: "include",
+                  body: JSON.stringify({
+                    email: payload.email,
+                    password: payload.password,
+                    redirect,
+                  }),
+                });
+
+                if (signInRes.redirected) {
+                  sessionStorage.removeItem("oauth_redirect");
+                  window.location.href = signInRes.url;
+                  return;
+                }
+
+                return; // 🔴 DO NOT FALL BACK
+              }
+
+              // ✅ normal signup
+              window.location.href = "/client-page.html";
+              return;
+            }
+
+            // 🔥 SIGNIN FLOW (FIXED)
+            const redirect = getRedirectUri();
+
+            if (redirect) {
+              return; // 🔴 NEVER fallback during OAuth
+            }
+
+            window.location.href = "/client-page.html";
+          } catch {
+            showError("Something went wrong.");
+          } finally {
+            setLoading(false);
           }
+        });
 
-          const data = await res.json().catch(() => ({}));
-
-          if (!res.ok) {
-            showError(data.message || "Something went wrong.");
-            return;
-          }
-
-          window.location.href = "/client-page.html";
-        } catch {
-          showError("Something went wrong.");
-        } finally {
-          setLoading(false);
+        // 🔥 store redirect on load
+        const params = new URLSearchParams(window.location.search);
+        const redirect = params.get("redirect");
+        if (redirect) {
+          sessionStorage.setItem("oauth_redirect", redirect);
         }
       });
-
-      window.addEventListener("pageshow", checkAuth);
     </script>
   </body>
 </html>

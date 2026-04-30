@@ -35,7 +35,7 @@ export const clientsTable = pgTable("clients", {
   applicationURL: text("application_url").notNull(),
   redirectUri: text("redirect_uri").notNull(),
 
-  userId: uuid("user_id"), // ✅ added
+  userId: uuid("user_id"), 
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
@@ -50,4 +50,15 @@ export const authCodesTable = pgTable("auth_codes", {
 
   expiresAt: timestamp("expires_at").notNull(),
   consumed: boolean("consumed").default(false),
+});
+
+export const consentsTable = pgTable("consents", {
+  id: uuid("id").primaryKey().defaultRandom(),
+
+  userId: uuid("user_id").notNull(),
+  clientId: varchar("client_id", { length: 100 }).notNull(),
+
+  isVerified: boolean("is_verified").default(false),
+
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });

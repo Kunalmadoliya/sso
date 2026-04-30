@@ -201,7 +201,7 @@
 
       async function approve() {
         try {
-          const res = await fetch("/authorize/approve", {
+          const res = await fetch("/oauth/consent", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -223,10 +223,6 @@
             return;
           }
 
-          if (!res.ok) {
-            alert(data.error || "Approval failed");
-            return;
-          }
 
           window.location.replace(data.redirect);
         } catch (err) {

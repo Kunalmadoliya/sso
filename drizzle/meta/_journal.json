@@ -50,6 +50,13 @@
       "when": 1777461723744,
       "tag": "0006_slimy_spot",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1777480019746,
+      "tag": "0007_aspiring_umar",
+      "breakpoints": true
     }
   ]
 }
