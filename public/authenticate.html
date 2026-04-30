@@ -330,6 +330,7 @@
 
     <script type="module">
       document.addEventListener("DOMContentLoaded", () => {
+        const BASE_URL = "https://sso-production-d29b.up.railway.app";
         const form = document.getElementById("loginForm");
         const submitBtn = document.getElementById("submitBtn");
         const spinner = document.getElementById("spinner");
@@ -403,7 +404,7 @@
               return;
             }
 
-            endpoint = "/o/authenticate/sign-up";
+            endpoint = `${BASE_URL}/o/authenticate/sign-up`;
             payload = {firstName, lastName, email, password};
           } else {
             const email = document.getElementById("email")?.value.trim();
@@ -414,7 +415,7 @@
               return;
             }
 
-            endpoint = "/o/authenticate/sign-in";
+            endpoint = `${BASE_URL}/o/authenticate/sign-in`;
             const redirect = getRedirectUri();
             payload = {email, password, redirect};
           }
@@ -448,7 +449,7 @@
               const redirect = getRedirectUri();
 
               if (redirect) {
-                const signInRes = await fetch("/o/authenticate/sign-in", {
+                const signInRes = await fetch(`${BASE_URL}/o/authenticate/sign-in`, {
                   method: "POST",
                   headers: {"Content-Type": "application/json"},
                   credentials: "include",
@@ -469,7 +470,7 @@
               }
 
               // ✅ normal signup
-              window.location.href = "/client-page.html";
+              window.location.href = "https://kunal-auth.vercel.app/client-page.html";
               return;
             }
 
@@ -480,7 +481,7 @@
               return; // 🔴 NEVER fallback during OAuth
             }
 
-            window.location.href = "/client-page.html";
+            window.location.href = "https://kunal-auth.vercel.app/client-page.html";
           } catch {
             showError("Something went wrong.");
           } finally {

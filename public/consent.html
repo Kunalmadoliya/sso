@@ -183,17 +183,12 @@
           Deny
         </button>
       </div>
-
-      <p
-        class="text-center text-[10px] text-zinc-600 mt-8 mono uppercase tracking-tight"
-      >
-        Redirecting to:
-        <span class="text-zinc-500">localhost:3000/callback</span>
-      </p>
     </div>
 
     <script>
       const params = new URLSearchParams(window.location.search);
+
+      const BASE_URL = "https://sso-production-d29b.up.railway.app";
 
       const client_id = params.get("client_id");
       const redirect_uri = params.get("redirect_uri");
@@ -201,7 +196,7 @@
 
       async function approve() {
         try {
-          const res = await fetch("/oauth/consent", {
+          const res = await fetch(`${BASE_URL}/oauth/consent`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -216,13 +211,10 @@
 
           const data = await res.json();
 
-     
-
           if (!res.ok) {
             alert(data.error || "Approval failed");
             return;
           }
-
 
           window.location.replace(data.redirect);
         } catch (err) {

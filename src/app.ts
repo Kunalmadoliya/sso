@@ -54,7 +54,8 @@ export function createApp() {
   );
 
   app.get("/.well-known/openid-configuration", (req, res) => {
-    const ISSUER = `http://localhost:${PORT}`;
+    const ISSUER = process.env.BASE_URL
+
     return res.json({
       issuer: ISSUER,
       authorization_endpoint: `${ISSUER}/oauth/authorize`,
@@ -101,7 +102,7 @@ export function createApp() {
       return res.status(401).json({message: "Invalid email or password."});
     }
 
-    const ISSUER = `http://localhost:${PORT}`;
+    const ISSUER = process.env.BASE_URL;
     const now = Math.floor(Date.now() / 1000);
 
     const claims = {
@@ -433,7 +434,7 @@ export function createApp() {
     const id_token = JWT.sign(
       {
         sub: authCode.userId,
-        iss: "http://localhost:3000",
+        iss: "https://sso-production-d29b.up.railway.app",
         aud: client_id,
       },
       PRIVATE_KEY,

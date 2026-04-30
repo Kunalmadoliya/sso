@@ -465,7 +465,8 @@
         setLoading(true);
 
         try {
-          const res = await fetch("/o/authenticate/sign-up", {
+          const BASE_URL = "https://sso-production-d29b.up.railway.app";
+          const res = await fetch(`${BASE_URL}/o/authenticate/sign-up`, {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({
@@ -491,7 +492,7 @@
           } else {
             showSuccess("Account created! Redirecting…");
             setTimeout(() => {
-              window.location.href = `/o/authenticate${window.location.search}`;
+              window.location.href = `${BASE_URL}/o/authenticate${window.location.search}`;
             }, 1500);
           }
         } catch {

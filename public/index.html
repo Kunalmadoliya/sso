@@ -316,7 +316,7 @@
             .getElementById("logout-btn")
             .addEventListener("click", logout);
         } catch {
-          // ❌ Not logged in UI
+  
           nav.innerHTML = `
         <a href="./authenticate.html"
           class="text-zinc-400 hover:text-white transition">
@@ -331,9 +331,9 @@
       }
 
       async function logout() {
-   
+        const BASE_URL = "https://sso-production-d29b.up.railway.app";
 
-        await fetch("/logout", {
+        await fetch(`${BASE_URL}/logout`, {
           method: "POST",
           credentials: "include",
         });

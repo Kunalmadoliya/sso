@@ -158,10 +158,11 @@
     </div>
 
     <script>
+      const BASE_URL = "https://sso-production-d29b.up.railway.app";
       document.addEventListener("DOMContentLoaded", () => {
         async function fetchData() {
           try {
-            const res = await fetch("/getall-apps", {
+            const res = await fetch(`${BASE_URL}//getall-apps`, {
               method: "GET",
               credentials: "include",
             });
@@ -193,7 +194,7 @@
             // 2. Map through apps
             container.innerHTML = "";
 
-           apps.results.forEach((app) => {
+            apps.results.forEach((app) => {
               const appCard = `
                 <div class="card-bg bento-border rounded-2xl p-6 app-card transition-all group relative">
                   <div class="flex justify-between items-start mb-6">
@@ -250,7 +251,7 @@
 
       async function logout() {
         try {
-          await fetch("/logout", {method: "POST"});
+          await fetch(`${BASE_URL}/logout`, {method: "POST"});
           window.location.href = "/";
         } catch {
           window.location.href = "/";

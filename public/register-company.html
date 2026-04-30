@@ -158,7 +158,9 @@
 
           if (!res.ok) throw new Error(data?.error?.message || "Failed");
 
-          const loginURL = `http://localhost:3000/oauth/authorize?client_id=${data.client_id}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=openid%20email%20profile&state=STATE&nonce=NONCE`;
+          const BASE_URL = "https://sso-production-d29b.up.railway.app";
+
+          const loginURL = `${BASE_URL}/oauth/authorize?client_id=${data.client_id}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=openid%20email%20profile&state=STATE&nonce=NONCE`;
 
           // 🔥 Perfectly Balanced Medium Bento UI
           document.getElementById("ui-content").innerHTML = `
