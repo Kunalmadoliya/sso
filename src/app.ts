@@ -37,7 +37,34 @@ export function createApp() {
 
   app.use(
     cors({
-      origin: "https://kunal-auth.vercel.app",
+      origin: (origin, callback) => {
+        // allow server-to-server / curl / no-origin requests
+        if (!origin) return callback(null, true);
+
+        // always allow your main frontend
+        const allowedStatic = ["https://kunal-auth.vercel.app"];
+
+        if (allowedStatic.includes(origin)) {
+          return callback(null, true);
+        }
+
+        // 🔥 dynamic DB check
+        db.select()
+          .from(clientsTable)
+          .where(eq(clientsTable.applicationURL, origin))
+          .limit(1)
+          .then((client) => {
+            if (client.length > 0) {
+              callback(null, true);
+            } else {
+              callback(new Error("CORS blocked"));
+            }
+          })
+          .catch(() => {
+            callback(new Error("CORS error"));
+          });
+      },
+
       credentials: true,
       methods: ["GET", "POST", "OPTIONS"],
       allowedHeaders: ["Content-Type"],
