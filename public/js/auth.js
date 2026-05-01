@@ -12,14 +12,26 @@ export async function isAuthenticated() {
 
 export async function protectPage() {
   const isAuth = await isAuthenticated();
+
   if (!isAuth) {
-    window.location.href = "/authenticate.html";
+    const current = window.location.href;
+    window.location.href = `/authenticate.html?redirect=${encodeURIComponent(current)}`;
   }
 }
-
 export async function redirectIfLoggedIn() {
   const isAuth = await isAuthenticated();
+
   if (isAuth) {
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get("redirect");
+
+    // 🔥 OAuth user
+    if (redirect && redirect.startsWith("http")) {
+      window.location.href = redirect;
+      return;
+    }
+
+    // ✅ Internal user
     window.location.href = "/";
   }
 }
