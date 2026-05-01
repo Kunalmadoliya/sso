@@ -75,8 +75,9 @@ export function createApp() {
   });
 
   app.post("/o/authenticate/sign-in", async (req, res) => {
-    const {email, password, client_id} = req.body;
-    const redirect = req.body.redirect || req.query.redirect;
+    const {email, password, client_id, redirect} = req.body;
+
+    console.log("Sign-in attempt:", {email, client_id, redirect});
 
     // =========================
     // 🔐 AUTH CHECK
@@ -118,24 +119,34 @@ export function createApp() {
       {algorithm: "RS256"},
     );
 
+    // ✅ FIX: Set cookie properly
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: process.env.NODE_ENV === "production", // ✅ Only secure in production
+      sameSite: "lax", // ✅ Changed from "none" to "lax"
       path: "/",
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
     });
 
+    console.log("Cookie set. Redirect:", redirect);
+
     // =========================
-    // 🔥 FLOW HANDLING
+    // 🔥 FLOW HANDLING - Return JSON instead of redirect
     // =========================
 
-    // ✅ OAuth / external app
+    // ✅ OAuth / external app - return JSON with redirect URL
     if (client_id && redirect && redirect.startsWith("http")) {
-      return res.redirect(redirect);
+      return res.status(200).json({
+        ok: true,
+        redirect: redirect, // ✅ Frontend handles redirect
+      });
     }
 
     // ✅ Internal dashboard
-    return res.redirect(`${process.env.CLIENT_URL}/`);
+    return res.status(200).json({
+      ok: true,
+      redirect: "/", // ✅ Frontend handles redirect
+    });
   });
 
   app.post("/o/authenticate/sign-up", async (req, res) => {
