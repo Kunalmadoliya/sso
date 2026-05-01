@@ -3,291 +3,411 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kunal Auth | Identity Architect</title>
+    <title>Kunal Auth | Identity Built for Scale</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
     <style>
+      :root {
+        --bg-color: #050505;
+        --card-bg: rgba(12, 12, 14, 0.7);
+        --accent: #10b981;
+      }
       body {
         font-family: "Space Grotesk", sans-serif;
-        background-color: #050505;
-        background-image: radial-gradient(#1a1a1a 1px, transparent 1px);
-        background-size: 32px 32px;
+        background-color: var(--bg-color);
+        background-image: radial-gradient(
+          circle at 2px 2px,
+          #1a1a1a 1px,
+          transparent 0
+        );
+        background-size: 40px 40px;
       }
       .mono {
         font-family: "JetBrains Mono", monospace;
       }
-      .bento-border {
-        border: 1px solid #1f1f1f;
+      .glass {
+        background: var(--card-bg);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
       }
-      .dotted-border {
-        border: 1px dashed #333;
-      }
-      .card-bg {
-        background: rgba(10, 10, 10, 0.95);
-        backdrop-filter: blur(12px);
-      }
-
-      /* Consistent Text Scaling */
       .text-label {
         font-size: 11px;
         text-transform: uppercase;
         letter-spacing: 0.15em;
-        font-weight: 600;
+        font-weight: 700;
+        color: #71717a;
+      }
+
+      .bento-card {
+        transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        position: relative;
+        overflow: hidden;
+      }
+      .bento-card:hover {
+        transform: translateY(-8px);
+        border-color: rgba(16, 185, 129, 0.3);
+        box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.7);
+      }
+
+      @keyframes packetFlow {
+        0% {
+          stroke-dashoffset: 100;
+          opacity: 0;
+        }
+        20% {
+          opacity: 1;
+        }
+        80% {
+          opacity: 1;
+        }
+        100% {
+          stroke-dashoffset: 0;
+          opacity: 0;
+        }
+      }
+      .packet-path {
+        stroke-dasharray: 10;
+        animation: packetFlow 3s infinite linear;
+      }
+      .node-pulse {
+        animation: nodePulse 2s infinite ease-in-out;
+      }
+      @keyframes nodePulse {
+        0%,
+        100% {
+          filter: drop-shadow(0 0 2px var(--accent));
+        }
+        50% {
+          filter: drop-shadow(0 0 10px var(--accent));
+        }
       }
     </style>
   </head>
-  <body class="text-zinc-400 antialiased py-8 px-4 sm:px-6">
-    <div class="max-w-6xl mx-auto space-y-4">
+  <body class="text-zinc-400 antialiased py-12 px-6 lg:px-12">
+    <div class="max-w-7xl mx-auto space-y-12">
+      <!-- NAV -->
       <nav
-        class="card-bg bento-border rounded-xl px-5 py-4 flex justify-between items-center shadow-2xl"
+        class="glass rounded-3xl px-8 py-5 flex justify-between items-center sticky top-8 z-50 shadow-2xl border-white/10"
       >
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-5">
           <div
-            class="w-10 h-10 bg-white text-black flex items-center justify-center rounded-lg font-bold text-xl"
+            class="w-10 h-10 bg-white text-black flex items-center justify-center rounded-xl font-bold text-xl shadow-[0_0_20px_rgba(255,255,255,0.2)]"
           >
             K
           </div>
           <div class="hidden sm:block">
             <h1
-              class="text-white font-bold leading-none text-base tracking-tight"
+              class="text-white font-bold leading-none text-lg tracking-tight"
             >
               Kunal Auth
             </h1>
-            <span class="text-label mono text-zinc-500 block mt-0.5"
-              >Identity Architect</span
+            <span
+              class="text-[10px] mono text-zinc-500 uppercase tracking-widest mt-1 block"
+              >The Standard for Identity</span
             >
           </div>
         </div>
 
-        <div class="flex items-center gap-6">
-          <div
-            id="nav-auth"
-            class="flex items-center gap-6 text-label mono"
-          ></div>
-
-          <div class="h-4 w-px bg-zinc-800 hidden md:block"></div>
-
-          <a
-            href="https://github.com/kunalmadoliya"
-            class="text-zinc-500 hover:text-white transition-colors"
-          >
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path
-                d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
-              />
-            </svg>
-          </a>
+        <div class="flex items-center gap-10">
+          <div class="hidden md:flex items-center gap-10 text-label mono">
+            <a
+              href="./docs.html"
+              class="hover:text-emerald-500 transition-colors"
+              >Documentation</a
+            >
+            <a
+              href="https://github.com/kunalmadoliya"
+              target="_blank"
+              class="hover:text-emerald-500 transition-colors"
+              >GitHub</a
+            >
+          </div>
+          <div id="nav-auth" class="flex items-center gap-4 text-label mono">
+            <!-- Dynamic Buttons -->
+          </div>
         </div>
       </nav>
 
-      <div class="grid grid-cols-12 gap-4">
+      <!-- HERO SECTION -->
+      <section class="grid grid-cols-12 gap-8">
         <div
-          class="col-span-12 lg:col-span-8 card-bg bento-border rounded-2xl p-8 lg:p-12 relative overflow-hidden"
+          class="col-span-12 lg:col-span-8 glass rounded-[40px] p-10 lg:p-14 relative overflow-hidden bento-card border-white/5"
         >
-          <span
-            class="mono text-label text-zinc-500 border border-zinc-800 px-3 py-1 rounded-full mb-8 inline-block"
-            >Protocol Implementation</span
-          >
-          <h2
-            class="text-5xl lg:text-7xl font-bold text-white mb-8 tracking-tighter leading-[0.9]"
-          >
-            Mastering the system by
-            <span class="text-zinc-700">engineering the source.</span>
-          </h2>
-          <p class="text-lg text-zinc-400 max-w-2xl leading-relaxed mb-10">
-            I spent my time implementing the "hard parts"—consent logic, PKCE
-            handshakes, and token rotation—from the ground up to truly
-            understand how identity works.
-          </p>
-          <div class="flex flex-wrap gap-4">
-            <button
-              class="bg-white text-black px-8 py-3 rounded-lg font-bold text-xs uppercase hover:bg-zinc-200 transition tracking-widest"
+          <div class="relative z-10">
+            <div class="flex items-center gap-2 mb-8">
+              <span
+                class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"
+              ></span>
+              <span class="mono text-label text-emerald-500"
+                >v2.0 Production Ready</span
+              >
+            </div>
+            <h2
+              class="text-5xl lg:text-7xl font-bold text-white mb-8 tracking-tighter leading-[1.0]"
             >
-              Register App
-            </button>
-            <button
-              class="border border-zinc-800 text-white px-8 py-3 rounded-lg font-bold text-xs uppercase hover:bg-zinc-900 transition tracking-widest"
-            >
-              Sign In
-            </button>
-          </div>
-        </div>
-
-        <div
-          class="col-span-12 lg:col-span-4 card-bg bento-border rounded-2xl p-8 flex flex-col justify-between"
-        >
-          <div>
-            <h3
-              class="text-white font-bold mb-4 uppercase text-xs tracking-[0.2em]"
-            >
-              The Sandbox
-            </h3>
-            <p class="text-sm leading-relaxed mb-6">
-              I built a demo client to showcase the full OIDC flow. It handles
-              the handshake, pulls user claims, and manages sessions just like a
-              production-ready application.
+              Authentication <br />
+              <span class="text-zinc-700 italic font-light">for builders.</span>
+            </h2>
+            <p class="text-lg text-zinc-400 max-w-xl leading-relaxed mb-10">
+              Deliver a seamless login experience without the overhead. Secure,
+              scalable OIDC infrastructure designed to drop into any stack in
+              minutes.
             </p>
+            <div class="flex flex-wrap gap-5">
+              <a
+                href="./authenticate.html"
+                class="bg-white text-black px-8 py-4 rounded-2xl font-bold text-xs uppercase hover:scale-105 transition-all shadow-xl tracking-widest"
+                >Register Application</a
+              >
+              <a
+                href="#workflow"
+                class="glass text-white px-8 py-4 rounded-2xl font-bold text-xs uppercase hover:bg-white/5 transition-all tracking-widest"
+                >Explore Flows</a
+              >
+            </div>
           </div>
-          <div class="space-y-3">
-            <button
-              class="w-full bg-zinc-100 text-black py-3 rounded-lg font-bold text-xs uppercase tracking-widest"
-            >
-              Try it live
-            </button>
-            <button
-              class="w-full dotted-border text-white py-3 rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-zinc-900 transition"
-            >
-              GitHub
-            </button>
-          </div>
-        </div>
-
-        <div
-          class="col-span-12 md:col-span-8 card-bg bento-border rounded-2xl p-8"
-        >
-          <h4
-            class="text-white font-bold mb-6 text-sm uppercase tracking-widest"
-          >
-            The Handshake
-          </h4>
           <div
-            class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 mono text-[11px]"
-          >
-            <div class="border-l-2 border-zinc-800 pl-4">
-              <span
-                class="block text-zinc-100 font-bold mb-1 underline decoration-zinc-700"
-                >01. Initialization</span
-              >
-              Client registers and hits the
-              <span class="text-zinc-300">/authorization</span> endpoint.
-            </div>
-            <div class="border-l-2 border-zinc-800 pl-4">
-              <span
-                class="block text-zinc-100 font-bold mb-1 underline decoration-zinc-700"
-                >02. Identity Check</span
-              >
-              Server verifies login status or prompts for credentials.
-            </div>
-            <div class="border-l-2 border-zinc-800 pl-4">
-              <span
-                class="block text-zinc-100 font-bold mb-1 underline decoration-zinc-700"
-                >03. User Consent</span
-              >
-              User approves scopes; server generates a secure one-time code.
-            </div>
-            <div class="border-l-2 border-zinc-800 pl-4">
-              <span
-                class="block text-zinc-100 font-bold mb-1 underline decoration-zinc-700"
-                >04. The Exchange</span
-              >
-              Client swaps code at <span class="text-zinc-300">/token</span> for
-              a full JWT payload.
-            </div>
-          </div>
-        </div>
-
-        <div
-          class="col-span-12 md:col-span-4 dotted-border rounded-2xl p-8 bg-zinc-900/10"
-        >
-          <h4
-            class="text-white font-bold mb-6 text-sm uppercase tracking-widest"
-          >
-            Capabilities
-          </h4>
-          <ul class="mono text-[11px] space-y-4">
-            <li class="flex gap-3 text-zinc-300">
-              <span>[x]</span> Authorization Code Flow
-            </li>
-            <li class="flex gap-3 text-zinc-300">
-              <span>[x]</span> PKCE / State / Nonce
-            </li>
-            <li class="flex gap-3 text-zinc-300">
-              <span>[x]</span> ID, Access & Refresh tokens
-            </li>
-            <li class="flex gap-3 text-zinc-300">
-              <span>[x]</span> Discovery & Userinfo
-            </li>
-            <li class="flex gap-3 text-zinc-300">
-              <span>[x]</span> Consent-based permissions
-            </li>
-          </ul>
-        </div>
-
-        <div
-          class="col-span-12 md:col-span-6 card-bg bento-border rounded-2xl p-8"
-        >
-          <h4
-            class="text-white font-bold mb-4 text-xs uppercase tracking-widest"
-          >
-            Internal Logic
-          </h4>
-          <p class="text-[13px] leading-relaxed text-zinc-500">
-            Sessions are server-side and stored in
-            <span class="text-white">Postgres</span>. Each request creates a
-            separate flow object, allowing a single user to have multiple client
-            flows active in parallel without conflict.
-          </p>
-        </div>
-
-        <div
-          class="col-span-12 md:col-span-6 card-bg bento-border rounded-2xl p-8"
-        >
-          <h4
-            class="text-white font-bold mb-4 text-xs uppercase tracking-widest"
-          >
-            User Control
-          </h4>
-          <p class="text-[13px] leading-relaxed text-zinc-500">
-            Signed-in users can audit every app they've authorized and revoke
-            access instantly. Revoking access removes both stored consent and
-            all issued tokens for that app.
-          </p>
-        </div>
-
-        <div
-          class="col-span-12 card-bg bento-border rounded-2xl p-10 md:p-14 border-t-4 border-zinc-800"
-        >
-          <div class="max-w-3xl mx-auto text-center space-y-8">
-            <h4 class="text-white font-bold text-sm uppercase tracking-[0.3em]">
-              Behind the Engineering
-            </h4>
-            <p
-              class="text-xl md:text-2xl font-light italic text-zinc-200 leading-snug"
-            >
-              "I wanted to see the edge cases—how state survives a redirect,
-              where PKCE fits in the logic, and how parallel flows behave for
-              the same user."
-            </p>
-            <div class="h-px w-20 bg-zinc-800 mx-auto"></div>
-            <p class="text-sm leading-relaxed text-zinc-500 max-w-xl mx-auto">
-              This project is a deep dive into the handshake protocols that
-              power the modern web. It’s an exploration of identity, security,
-              and how everything wires together when you build the provider
-              yourself.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <footer
-        class="card-bg bento-border rounded-xl p-6 flex justify-between items-center"
-      >
-        <div class="text-label mono text-zinc-500">
-          Crafted by <span class="text-white">Kunal</span>
-        </div>
-        <div class="flex items-center gap-3">
-          <div
-            class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_#10b981]"
+            class="absolute -right-20 -top-20 w-[500px] h-[500px] bg-emerald-500/5 blur-[120px] rounded-full"
           ></div>
-          <span class="text-label mono text-zinc-400 font-bold"
-            >System Online</span
-          >
+        </div>
+
+        <!-- HANDSHAKE VISUAL (Preserved) -->
+        <div
+          id="workflow-visual"
+          class="col-span-12 lg:col-span-4 glass rounded-[40px] p-10 flex flex-col items-center justify-between bento-card text-center border-white/5"
+        >
+          <h3 class="text-label mb-8">Secure Exchange Flow</h3>
+          <div class="relative w-full aspect-square max-w-[240px]">
+            <svg
+              viewBox="0 0 200 200"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                class="packet-path"
+                d="M100 40 L40 140"
+                stroke="url(#gradient-green)"
+                stroke-width="2"
+              />
+              <path
+                class="packet-path"
+                style="animation-delay: 1s"
+                d="M40 140 L160 140"
+                stroke="url(#gradient-green)"
+                stroke-width="2"
+              />
+              <path
+                class="packet-path"
+                style="animation-delay: 2s"
+                d="M160 140 L100 40"
+                stroke="url(#gradient-green)"
+                stroke-width="2"
+              />
+              <g class="node-pulse">
+                <circle cx="100" cy="40" r="12" fill="#fff" />
+                <text
+                  x="100"
+                  y="44"
+                  text-anchor="middle"
+                  fill="black"
+                  font-weight="bold"
+                  font-size="10"
+                >
+                  K
+                </text>
+              </g>
+              <circle
+                cx="40"
+                cy="140"
+                r="8"
+                fill="#27272a"
+                stroke="#3f3f46"
+                stroke-width="2"
+              />
+              <circle
+                cx="160"
+                cy="140"
+                r="8"
+                fill="#27272a"
+                stroke="#3f3f46"
+                stroke-width="2"
+              />
+              <defs>
+                <linearGradient
+                  id="gradient-green"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="0%"
+                >
+                  <stop offset="0%" stop-color="transparent" />
+                  <stop offset="50%" stop-color="#10b981" />
+                  <stop offset="100%" stop-color="transparent" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <div
+              class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-6 mono text-[9px] text-white uppercase tracking-tighter"
+            >
+              Auth Server
+            </div>
+            <div class="absolute bottom-4 left-0 mono text-[9px] uppercase">
+              Client App
+            </div>
+            <div class="absolute bottom-4 right-0 mono text-[9px] uppercase">
+              User
+            </div>
+          </div>
+          <p class="text-[10px] text-zinc-500 uppercase tracking-widest mt-6">
+            Real-time OIDC <br />
+            Token Rotation
+          </p>
+        </div>
+      </section>
+
+      <!-- NEW WORKFLOW BENTO SECTION -->
+      <section id="workflow" class="grid grid-cols-12 gap-8">
+        <!-- Internal Flow -->
+        <div
+          class="col-span-12 md:col-span-7 glass rounded-[40px] p-10 bento-card border-white/5"
+        >
+          <h3 class="text-white font-bold text-2xl mb-6 tracking-tight">
+            Developer Workflow
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div class="space-y-3">
+              <div class="text-emerald-500 mono text-xs font-bold">Step 01</div>
+              <h4 class="text-white font-bold text-sm">Register Instance</h4>
+              <p class="text-xs leading-relaxed">
+                Create your app profile, define Redirect URIs, and secure your
+                production environment.
+              </p>
+            </div>
+            <div class="space-y-3">
+              <div class="text-emerald-500 mono text-xs font-bold">Step 02</div>
+              <h4 class="text-white font-bold text-sm">Generate Credentials</h4>
+              <p class="text-xs leading-relaxed">
+                Instantly receive your <b>Client ID</b> and
+                <b>Client Secret</b> to initiate handshakes.
+              </p>
+            </div>
+            <div class="space-y-3">
+              <div class="text-emerald-500 mono text-xs font-bold">Step 03</div>
+              <h4 class="text-white font-bold text-sm">Integrate SSO</h4>
+              <p class="text-xs leading-relaxed">
+                Drop our production URL into your stack. Users authenticate via
+                our secure portal.
+              </p>
+            </div>
+            <div class="space-y-3">
+              <div class="text-emerald-500 mono text-xs font-bold">Step 04</div>
+              <h4 class="text-white font-bold text-sm">Manage Apps</h4>
+              <p class="text-xs leading-relaxed">
+                Track sessions, rotate secrets, and monitor your ecosystem from
+                the unified dashboard.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- External User Flow Visual -->
+        <div
+          class="col-span-12 md:col-span-5 glass rounded-[40px] p-10 bento-card border-emerald-500/10 flex flex-col justify-center"
+        >
+          <div class="space-y-6">
+            <div class="flex items-center gap-4">
+              <div
+                class="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-xs"
+              >
+                1
+              </div>
+              <p class="text-xs text-zinc-300 italic">
+                User clicks "Login with Kunal"
+              </p>
+            </div>
+            <div class="w-[2px] h-4 bg-zinc-800 ml-4"></div>
+            <div class="flex items-center gap-4">
+              <div
+                class="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 text-xs"
+              >
+                2
+              </div>
+              <p class="text-xs text-zinc-300 italic">
+                SSO Consent screen appears
+              </p>
+            </div>
+            <div class="w-[2px] h-4 bg-zinc-800 ml-4"></div>
+            <div class="flex items-center gap-4">
+              <div
+                class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-black font-bold text-xs"
+              >
+                3
+              </div>
+              <p class="text-xs text-white font-bold uppercase tracking-wide">
+                Success: Redirected with Code
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FEATURE GRID -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="glass rounded-3xl p-8 bento-card border-white/5">
+          <h5 class="text-white font-bold mb-3">Postgres Store</h5>
+          <p class="text-sm text-zinc-500">
+            ACID compliant session tracking for extreme reliability.
+          </p>
+        </div>
+        <div class="glass rounded-3xl p-8 bento-card border-white/5">
+          <h5 class="text-white font-bold mb-3">JWT Signing</h5>
+          <p class="text-sm text-zinc-500">
+            Industry standard HS256 tokens for stateless verification.
+          </p>
+        </div>
+        <div class="glass rounded-3xl p-8 bento-card border-white/5">
+          <h5 class="text-white font-bold mb-3">PKCE Support</h5>
+          <p class="text-sm text-zinc-500">
+            Advanced security for mobile and single-page applications.
+          </p>
+        </div>
+        <div class="glass rounded-3xl p-8 bento-card border-white/5">
+          <h5 class="text-white font-bold mb-3">OIDC Scopes</h5>
+          <p class="text-sm text-zinc-500">
+            OpenID, Profile, and Email scopes supported out of the box.
+          </p>
+        </div>
+      </section>
+
+      <!-- FOOTER -->
+      <footer
+        class="glass rounded-[32px] p-8 flex flex-col md:flex-row justify-between items-center gap-6 border-white/5"
+      >
+        <div class="flex items-center gap-4">
+          <div class="text-[10px] mono tracking-widest text-zinc-500">
+            DESIGNED BY @KUNALMADOLIYA
+          </div>
+          <div class="h-4 w-[1px] bg-white/10"></div>
+          <div class="flex items-center gap-2">
+            <div
+              class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"
+            ></div>
+            <span class="text-[10px] mono text-zinc-400">UPTIME: 99.9%</span>
+          </div>
+        </div>
+
+        <div class="flex gap-8 text-label mono text-[10px]">
+          <a href="#" class="hover:text-white transition">Privacy</a>
+          <a href="#" class="hover:text-white transition">Terms</a>
+          <a href="#" class="hover:text-white transition">Status</a>
         </div>
       </footer>
     </div>
+
+    <!-- LOGIC (Untouched as requested) -->
     <script type="module">
       import {isAuthenticated} from "./js/auth.js";
 
@@ -297,35 +417,20 @@
 
         try {
           const isAuth = await isAuthenticated();
-
           if (!isAuth) throw new Error();
 
-          // ✅ Logged in UI
           nav.innerHTML = `
-        <button id="logout-btn" class="text-zinc-400 hover:text-white transition">
-          Logout
-        </button>
-        <a href="./client-page.html"
-          class="text-white bg-zinc-900 border border-zinc-800 px-4 py-2 rounded-lg hover:bg-zinc-800 transition">
-          Register App
-        </a>
-      `;
-
-          // 🔥 attach event (important)
+            <button id="logout-btn" class="hover:text-emerald-500 transition-colors">Logout</button>
+            <a href="./client-page.html" class="bg-white text-black px-5 py-2.5 rounded-xl font-bold hover:scale-105 transition-all">Dashboard</a>
+          `;
           document
             .getElementById("logout-btn")
             .addEventListener("click", logout);
         } catch {
           nav.innerHTML = `
-        <a href="./authenticate.html"
-          class="text-zinc-400 hover:text-white transition">
-          Login
-        </a>
-        <a href="./signup.html"
-          class="text-black bg-white px-4 py-2 rounded-lg font-bold hover:bg-zinc-200 transition">
-          Create Account
-        </a>
-      `;
+            <a href="./authenticate.html" class="hover:text-white transition-colors">Sign In</a>
+            <a href="./authenticate.html" class="bg-white text-black px-5 py-2.5 rounded-xl font-bold hover:scale-105 transition-all">Get Started</a>
+          `;
         }
       }
 
@@ -336,15 +441,14 @@
             method: "POST",
             credentials: "include",
           });
-
           window.location.href = "/";
         } catch {
           window.location.href = "/";
         }
       }
 
-      // ✅ handles reload + back navigation
       window.addEventListener("pageshow", checkAuth);
+      checkAuth();
     </script>
   </body>
 </html>

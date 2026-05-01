@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kunal Auth | Integration Docs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Space Grotesk", sans-serif;
+        background-color: #050505;
+        background-image: radial-gradient(#1a1a1a 1px, transparent 1px);
+        background-size: 32px 32px;
+      }
+      .mono {
+        font-family: "JetBrains Mono", monospace;
+      }
+      .glass-card {
+        background: rgba(15, 15, 15, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid #1f1f1f;
+      }
+      .step-node {
+        width: 40px;
+        height: 40px;
+        background: #111;
+        border: 2px solid #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        color: white;
+        font-weight: bold;
+        flex-shrink: 0;
+      }
+      pre {
+        background: #000 !important;
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid #1f1f1f;
+        overflow-x: auto;
+        position: relative;
+      }
+      .copy-btn {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        padding: 4px 8px;
+        font-size: 10px;
+        background: #1f1f1f;
+        border: 1px solid #333;
+        border-radius: 4px;
+        color: #a1a1aa;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .copy-btn:hover {
+        background: white;
+        color: black;
+      }
+
+      /* FIXED: CSS syntax for the badge */
+      .location-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        color: #10b981;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+    </style>
+  </head>
+  <body class="text-zinc-400 antialiased pb-12 px-4">
+    <!-- Hero Section -->
+    <header class="max-w-4xl mx-auto pt-20 pb-16">
+      <div class="flex items-center gap-3 mb-6">
+        <div
+          class="w-10 h-10 bg-white text-black flex items-center justify-center rounded-lg font-bold text-xl"
+        >
+          K
+        </div>
+        <h1 class="text-2xl font-bold text-white tracking-tight">
+          Kunal Auth Documentation
+        </h1>
+      </div>
+      <p
+        class="text-4xl sm:text-6xl font-bold text-white tracking-tighter mb-4"
+      >
+        Documentation
+      </p>
+      <p class="text-lg text-zinc-500">
+        A plain-English guide on exactly what code to write and
+        <strong>where to put it</strong>.
+      </p>
+    </header>
+
+    <main class="max-w-4xl mx-auto space-y-20">
+      <!-- Section 1: The Trigger -->
+      <section class="space-y-6">
+        <div class="flex items-center gap-4">
+          <div class="step-node">01</div>
+          <h2 class="text-2xl font-bold text-white">The Login Trigger</h2>
+        </div>
+
+        <div class="location-badge">
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+            ></path>
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+            ></path>
+          </svg>
+          File Location: index.html (Or your main page with the Login button)
+        </div>
+
+        <p class="text-zinc-300">
+          👉 Attach this function to your "Login" button. It packages your app's
+          ID and securely redirects the user to the SSO portal.
+        </p>
+
+        <div class="relative">
+          <pre
+            class="mono text-sm"
+          ><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+function login() {
+  const CLIENT_ID = "your_client_id";
+  const REDIRECT_URI = "your_redirect_uri";
+
+  const url = new URL("https://sso-production-d29b.up.railway.app/oauth/authorize");
+  url.searchParams.set("client_id", CLIENT_ID);
+  url.searchParams.set("redirect_uri", REDIRECT_URI);
+  url.searchParams.set("response_type", "code");
+  url.searchParams.set("scope", "openid email profile");
+  url.searchParams.set("state", "random_state");
+
+  window.location.href = url.toString();
+}</pre>
+        </div>
+      </section>
+
+      <!-- Section 2: The Handshake -->
+      <section class="space-y-6">
+        <div class="flex items-center gap-4">
+          <div class="step-node">02</div>
+          <h2 class="text-2xl font-bold text-white">
+            The SSO Redirect (Handshake)
+          </h2>
+        </div>
+
+        <div
+          class="location-badge"
+          style="
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.3);
+            color: #60a5fa;
+          "
+        >
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+            ></path>
+          </svg>
+          Location: Happens entirely on Kunal Auth Servers
+        </div>
+
+        <div class="glass-card rounded-2xl p-6 border-l-2 border-blue-500">
+          <p class="text-white">
+            <strong>You don't need to write code for this part.</strong>
+          </p>
+          <p class="mt-2 leading-relaxed">
+            The user enters their credentials on our secure server. Once
+            authenticated, we automatically bounce them back to the
+            <code>REDIRECT_URI</code> you provided in Step 1 (e.g., your
+            <code>auth.html</code> page). <br /><br />We attach a secret code to
+            the URL, making it look like this: <br /><code
+              class="text-blue-400 bg-blue-900/30 px-2 py-1 rounded"
+              >your_redirect_uri?code=abc123XYZ</code
+            >
+          </p>
+        </div>
+      </section>
+
+      <!-- Section 3: The Callback Logic -->
+      <section class="space-y-6">
+        <div class="flex items-center gap-4">
+          <div class="step-node">03</div>
+          <h2 class="text-2xl font-bold text-white">The Token Exchange</h2>
+        </div>
+
+        <div
+          class="location-badge"
+          style="
+            background: rgba(245, 158, 11, 0.1);
+            border-color: rgba(245, 158, 11, 0.3);
+            color: #fbbf24;
+          "
+        >
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+            ></path>
+          </svg>
+          File Location: auth.html (Inside a &lt;script&gt; tag)
+        </div>
+
+        <p class="text-zinc-300">
+          👉 This is the logic for your callback page. Put your constants right
+          at the top so the function can use them. It extracts the
+          <code>?code=</code> from the URL and securely exchanges it for the
+          user's data.
+        </p>
+
+        <div class="relative">
+          <pre
+            class="mono text-sm"
+          ><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+const CLIENT_ID = "your_client_id";
+const CLIENT_SECRET = "your_client_secret";
+const REDIRECT_URI = "your_redirect_uri";
+
+function handleOAuth() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get("code");
+
+  console.log("CODE:", code);
+
+  // If no code exists, or we already processed it, stop here.
+  if (!code || sessionStorage.getItem("oauth_done")) return;
+
+  sessionStorage.setItem("oauth_done", "true");
+
+  fetch("https://sso-production-d29b.up.railway.app/token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      code,
+      client_id: CLIENT_ID,
+      client_secret: CLIENT_SECRET,
+      redirect_uri: REDIRECT_URI,
+    }),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      console.log("TOKEN:", data);
+
+      // Extract User Info and save it
+      const user = JSON.parse(atob(data.id_token.split(".")[1]));
+      localStorage.setItem("user", JSON.stringify(user));
+
+      console.log("Logged in:", user.email);
+
+      // Clean the URL bar so the "?code=" disappears
+      window.history.replaceState({}, document.title, "/auth.html");
+    })
+    .catch(console.error);
+}</pre>
+        </div>
+        <p class="text-xs text-red-400 mt-4 italic">
+          *Note: In a true production environment, you should move this Step to
+          a backend server so your CLIENT_SECRET is never visible in the
+          browser.
+        </p>
+      </section>
+
+      <!-- Section 4: The Recovery Loop -->
+      <section class="space-y-6">
+        <div class="flex items-center gap-4">
+          <div class="step-node">04</div>
+          <h2 class="text-2xl font-bold text-white">
+            Executing The Flow (Recovery Loop)
+          </h2>
+        </div>
+
+        <div
+          class="location-badge"
+          style="
+            background: rgba(236, 72, 153, 0.1);
+            border-color: rgba(236, 72, 153, 0.3);
+            color: #f472b6;
+          "
+        >
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M13 10V3L4 14h7v7l9-11h-7z"
+            ></path>
+          </svg>
+          File Location: auth.html (Right below the handleOAuth function)
+        </div>
+
+        <p class="text-zinc-300">
+          👉 Defining the function isn't enough; you must run it. Because some
+          browsers drop the first network request on new user flows, we run a
+          stacked timeout loop.
+          <strong>This guarantees the login completes successfully.</strong>
+        </p>
+
+        <div class="relative">
+          <pre
+            class="mono text-sm"
+          ><button class="copy-btn" onclick="copyCode(this)">Copy</button>
+// 🔥 RUN MULTIPLE TIMES (THIS FIXES NEW USER FLOW)
+handleOAuth();
+setTimeout(handleOAuth, 300);
+setTimeout(handleOAuth, 800);</pre>
+        </div>
+      </section>
+
+      <!-- Footer Made With Heart -->
+      <footer class="mt-24 pt-8 border-t border-zinc-900 flex justify-center">
+        <p
+          class="text-zinc-500 font-medium flex items-center gap-2 text-sm uppercase tracking-widest"
+        >
+          Made with
+          <svg
+            class="w-4 h-4 text-red-500 animate-pulse"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+            />
+          </svg>
+          by Kunal
+        </p>
+      </footer>
+    </main>
+
+    <script>
+      async function copyCode(button) {
+        const pre = button.parentElement;
+        let code = pre.innerText.replace("Copy", "").replace("Copied!", "");
+        // Clean up leading/trailing empty lines
+        code = code.replace(/^\s*[\r\n]/g, "").trimEnd();
+        await navigator.clipboard.writeText(code);
+        button.innerText = "Copied!";
+        button.style.color = "#10b981";
+        setTimeout(() => {
+          button.innerText = "Copy";
+          button.style.color = "#a1a1aa";
+        }, 2000);
+      }
+    </script>
+  </body>
+</html>
