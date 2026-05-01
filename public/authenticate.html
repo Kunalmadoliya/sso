@@ -374,6 +374,11 @@
           const params = new URLSearchParams(window.location.search);
           const redirect = params.get("redirect");
 
+          // 🚫 prevent self-loop
+          if (redirect && redirect.includes("/o/authenticate")) {
+            return null;
+          }
+
           if (redirect) {
             sessionStorage.setItem("oauth_redirect", redirect);
             return redirect;
@@ -415,8 +420,13 @@
             }
 
             endpoint = `${BASE_URL}/o/authenticate/sign-in`;
+
             const redirect = getRedirectUri();
-            payload = {email, password, redirect};
+            const client_id = new URLSearchParams(window.location.search).get(
+              "client_id",
+            );
+
+            payload = {email, password, redirect, client_id};
           }
 
           setLoading(true);
@@ -429,14 +439,20 @@
               body: JSON.stringify(payload),
             });
 
-            // 🔥 backend redirect (OAuth)
+            // 🔥 OAuth backend redirect
             if (res.redirected) {
               sessionStorage.removeItem("oauth_redirect");
               window.location.href = res.url;
               return;
             }
 
-            const data = await res.json();
+            let data = {};
+            try {
+              data = await res.json();
+            } catch {
+              showError("Server error: invalid response");
+              return;
+            }
 
             if (!res.ok) {
               showError(data.message || "Something went wrong.");
@@ -444,7 +460,7 @@
             }
 
             // =========================
-            // ✅ SIGNUP FLOW (FIXED)
+            // ✅ SIGNUP FLOW
             // =========================
             if (isSignUp) {
               const redirect = getRedirectUri();
@@ -473,7 +489,6 @@
                 return; // 🚫 no fallback
               }
 
-              // ✅ INTERNAL USER ONLY
               window.location.href = "/";
               return;
             }
@@ -483,13 +498,18 @@
             // =========================
             const redirect = getRedirectUri();
 
-            if (redirect) {
-              return; // OAuth handled by backend
-            }
-
-            // ✅ INTERNAL USER ONLY
-            window.location.href = "/";
-          } catch {
+            setTimeout(() => {
+              if (redirect && redirect.startsWith("http")) {
+                // 🔥 external OAuth user
+                sessionStorage.removeItem("oauth_redirect");
+                window.location.href = redirect;
+              } else {
+                // ✅ internal user
+                window.location.href = "/";
+              }
+            }, 300);
+          } catch (err) {
+            console.error(err);
             showError("Something went wrong.");
           } finally {
             setLoading(false);
