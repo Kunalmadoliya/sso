@@ -4,7 +4,7 @@ import { createApp } from "./app.js";
 
 async function main() {
   try {
-    const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
+    const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000
 
     const server = createServer(createApp());
 
