@@ -259,10 +259,16 @@ export function createApp() {
     }
   });
 
-  app.post("/logout", async (req, res) => {
-    res.clearCookie("accessToken");
-    return res.status(200).json({message: "Successfully logout"});
+app.post("/logout", async (req, res) => {
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    path: "/",
   });
+
+  return res.status(200).json({message: "Successfully logout"});
+});
 
   app.post("/register-company", async (req, res) => {
     const {name, applicationURL, redirectUri} = req.body;

@@ -316,7 +316,6 @@
             .getElementById("logout-btn")
             .addEventListener("click", logout);
         } catch {
-  
           nav.innerHTML = `
         <a href="./authenticate.html"
           class="text-zinc-400 hover:text-white transition">
@@ -330,15 +329,18 @@
         }
       }
 
+      const BASE_URL = "https://sso-production-d29b.up.railway.app";
       async function logout() {
-        const BASE_URL = "https://sso-production-d29b.up.railway.app";
+        try {
+          await fetch(`${BASE_URL}/logout`, {
+            method: "POST",
+            credentials: "include",
+          });
 
-        await fetch(`${BASE_URL}/logout`, {
-          method: "POST",
-          credentials: "include",
-        });
-
-        window.location.reload();
+          window.location.href = "/";
+        } catch {
+          window.location.href = "/";
+        }
       }
 
       // ✅ handles reload + back navigation

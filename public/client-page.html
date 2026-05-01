@@ -251,7 +251,11 @@
 
       async function logout() {
         try {
-          await fetch(`${BASE_URL}/logout`, {method: "POST"});
+          await fetch(`${BASE_URL}/logout`, {
+            method: "POST",
+            credentials: "include",
+          });
+
           window.location.href = "/";
         } catch {
           window.location.href = "/";
@@ -260,5 +264,3 @@
     </script>
   </body>
 </html>
-
-
