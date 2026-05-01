@@ -75,13 +75,9 @@ export function createApp() {
   });
 
   app.post("/o/authenticate/sign-in", async (req, res) => {
-    const {email, password, client_id, redirect} = req.body;
+    const {email, password, client_id} = req.body;
+    const redirect = req.body.redirect || req.query.redirect;
 
-    console.log("Sign-in attempt:", {email, client_id, redirect});
-
-    // =========================
-    // 🔐 AUTH CHECK
-    // =========================
     if (!email || !password) {
       return res
         .status(400)
@@ -107,45 +103,31 @@ export function createApp() {
       return res.status(401).json({message: "Invalid email or password."});
     }
 
-    // =========================
-    // 🎟 TOKEN
-    // =========================
     const accessToken = JWT.sign(
-      {
-        sub: user.id,
-        email: user.email,
-      },
+      {sub: user.id, email: user.email},
       PRIVATE_KEY,
       {algorithm: "RS256"},
     );
 
-    // ✅ FIX: Set cookie properly
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // ✅ Only secure in production
-      sameSite: "lax", // ✅ Changed from "none" to "lax"
+      secure: true,
+      sameSite: "none",
       path: "/",
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      maxAge: 24 * 60 * 60 * 1000,
     });
 
-    console.log("Cookie set. Redirect:", redirect);
-
-    // =========================
-    // 🔥 FLOW HANDLING - Return JSON instead of redirect
-    // =========================
-
-    // ✅ OAuth / external app - return JSON with redirect URL
+    // 🔥 IMPORTANT: return JSON, not redirect
     if (client_id && redirect && redirect.startsWith("http")) {
-      return res.status(200).json({
+      return res.json({
         ok: true,
-        redirect: redirect, // ✅ Frontend handles redirect
+        redirect,
       });
     }
 
-    // ✅ Internal dashboard
-    return res.status(200).json({
+    return res.json({
       ok: true,
-      redirect: "/", // ✅ Frontend handles redirect
+      redirect: `${process.env.CLIENT_URL}/`,
     });
   });
 
