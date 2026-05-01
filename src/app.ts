@@ -35,8 +35,6 @@ export function createApp() {
   app.use(express.json());
   const PORT = process.env.PORT ?? 3000;
 
-
-
   app.use(
     cors({
       origin: "https://kunal-auth.vercel.app",
@@ -45,7 +43,6 @@ export function createApp() {
       allowedHeaders: ["Content-Type"],
     }),
   );
-
 
   app.use(cookieParser());
 
@@ -133,13 +130,17 @@ export function createApp() {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    // 🔥 CORE LOGIC
+    // =========================
+    // 🔥 FIXED REDIRECT LOGIC
+    // =========================
+
     if (redirect) {
-      return res.redirect(redirect); // OAuth flow
+      // ✅ OAuth / external user
+      return res.redirect(redirect);
     }
 
-    // 🔥 NORMAL LOGIN
-    return res.redirect("/client-page.html");
+    // ✅ INTERNAL USER ONLY (no redirect param)
+    return res.redirect(`${process.env.CLIENT_URL}/`);
   });
 
   app.post("/o/authenticate/sign-up", async (req, res) => {

@@ -361,7 +361,6 @@
               : "Sign in";
         }
 
-        // ✅ safe toggle (no crash if missing)
         if (toggleLink) {
           toggleLink.addEventListener("click", (e) => {
             e.preventDefault();
@@ -370,7 +369,7 @@
           });
         }
 
-        // 🔥 Persist redirect across OAuth
+        // 🔥 Persist redirect
         function getRedirectUri() {
           const params = new URLSearchParams(window.location.search);
           const redirect = params.get("redirect");
@@ -430,7 +429,7 @@
               body: JSON.stringify(payload),
             });
 
-            // 🔥 HANDLE BACKEND REDIRECT (CRITICAL)
+            // 🔥 backend redirect (OAuth)
             if (res.redirected) {
               sessionStorage.removeItem("oauth_redirect");
               window.location.href = res.url;
@@ -444,21 +443,26 @@
               return;
             }
 
-            // 🔥 SIGNUP FLOW (FIXED)
+            // =========================
+            // ✅ SIGNUP FLOW (FIXED)
+            // =========================
             if (isSignUp) {
               const redirect = getRedirectUri();
 
               if (redirect) {
-                const signInRes = await fetch(`${BASE_URL}/o/authenticate/sign-in`, {
-                  method: "POST",
-                  headers: {"Content-Type": "application/json"},
-                  credentials: "include",
-                  body: JSON.stringify({
-                    email: payload.email,
-                    password: payload.password,
-                    redirect,
-                  }),
-                });
+                const signInRes = await fetch(
+                  `${BASE_URL}/o/authenticate/sign-in`,
+                  {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    credentials: "include",
+                    body: JSON.stringify({
+                      email: payload.email,
+                      password: payload.password,
+                      redirect,
+                    }),
+                  },
+                );
 
                 if (signInRes.redirected) {
                   sessionStorage.removeItem("oauth_redirect");
@@ -466,22 +470,25 @@
                   return;
                 }
 
-                return; // 🔴 DO NOT FALL BACK
+                return; // 🚫 no fallback
               }
 
-              // ✅ normal signup
-              window.location.href = "https://kunal-auth.vercel.app/client-page.html";
+              // ✅ INTERNAL USER ONLY
+              window.location.href = "/";
               return;
             }
 
-            // 🔥 SIGNIN FLOW (FIXED)
+            // =========================
+            // ✅ SIGNIN FLOW (FIXED)
+            // =========================
             const redirect = getRedirectUri();
 
             if (redirect) {
-              return; // 🔴 NEVER fallback during OAuth
+              return; // OAuth handled by backend
             }
 
-            window.location.href = "https://kunal-auth.vercel.app/client-page.html";
+            // ✅ INTERNAL USER ONLY
+            window.location.href = "/";
           } catch {
             showError("Something went wrong.");
           } finally {
@@ -489,7 +496,7 @@
           }
         });
 
-        // 🔥 store redirect on load
+        // 🔥 store redirect
         const params = new URLSearchParams(window.location.search);
         const redirect = params.get("redirect");
         if (redirect) {
