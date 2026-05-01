@@ -199,7 +199,7 @@ export function createApp() {
       return res.status(401).json({error: {message: "Not authenticated"}});
     }
 
-   res.redirect("client-page.html")
+    res.redirect("client-page.html");
   });
 
   app.get("/client-info", async (req, res) => {});
@@ -482,6 +482,33 @@ export function createApp() {
     }
 
     res.status(200).json({results});
+  });
+
+  app.get("/apps", async (req, res) => {
+    app.get("/apps", async (req, res) => {
+      const token = req.cookies?.accessToken;
+
+      if (!token) {
+        return res.status(401).json({error: "Not authenticated"});
+      }
+
+      let claims: JWTClaims;
+
+      try {
+        claims = JWT.verify(token, PUBLIC_KEY, {
+          algorithms: ["RS256"],
+        }) as JWTClaims;
+      } catch {
+        return res.status(401).json({error: "Invalid or expired token"});
+      }
+
+      const results = await db
+        .select()
+        .from(clientsTable)
+        .where(eq(clientsTable.userId, claims.sub));
+
+      return res.status(200).json({results});
+    });
   });
   return app;
 }
