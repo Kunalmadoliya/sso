@@ -75,9 +75,12 @@ export function createApp() {
   });
 
   app.post("/o/authenticate/sign-in", async (req, res) => {
-    const {email, password} = req.body;
+    const {email, password, client_id} = req.body;
     const redirect = req.body.redirect || req.query.redirect;
 
+    // =========================
+    // 🔐 AUTH CHECK
+    // =========================
     if (!email || !password) {
       return res
         .status(400)
@@ -103,43 +106,35 @@ export function createApp() {
       return res.status(401).json({message: "Invalid email or password."});
     }
 
-    const ISSUER = process.env.BASE_URL;
-    const now = Math.floor(Date.now() / 1000);
-
-    const claims = {
-      iss: ISSUER,
-      sub: user.id,
-      email: user.email,
-      email_verified: String(user.emailVerified),
-      exp: now + 3600,
-      given_name: user.firstName ?? "",
-      family_name: user.lastName ?? undefined,
-      name: [user.firstName, user.lastName].filter(Boolean).join(" "),
-      picture: user.profileImage ?? undefined,
-    };
-
-    const accessToken = JWT.sign(claims, PRIVATE_KEY, {
-      algorithm: "RS256",
-    });
+    // =========================
+    // 🎟 TOKEN
+    // =========================
+    const accessToken = JWT.sign(
+      {
+        sub: user.id,
+        email: user.email,
+      },
+      PRIVATE_KEY,
+      {algorithm: "RS256"},
+    );
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: true,
       sameSite: "none",
       path: "/",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     // =========================
-    // 🔥 FIXED REDIRECT LOGIC
+    // 🔥 FLOW HANDLING
     // =========================
 
-    if (redirect) {
-      // ✅ OAuth / external user
+    // ✅ OAuth / external app
+    if (client_id && redirect && redirect.startsWith("http")) {
       return res.redirect(redirect);
     }
 
-    // ✅ INTERNAL USER ONLY (no redirect param)
+    // ✅ Internal dashboard
     return res.redirect(`${process.env.CLIENT_URL}/`);
   });
 
