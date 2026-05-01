@@ -375,10 +375,9 @@
           const redirect = params.get("redirect");
 
           // 🚫 prevent self-loop
-          if (redirect && redirect.includes("/o/authenticate")) {
+          if (redirect && redirect.includes("/authenticate.html")) {
             return null;
           }
-
           if (redirect) {
             sessionStorage.setItem("oauth_redirect", redirect);
             return redirect;
@@ -499,13 +498,11 @@
             const redirect = getRedirectUri();
 
             setTimeout(() => {
-              if (redirect && redirect.startsWith("http")) {
-                // 🔥 external OAuth user
+              if (redirect) {
                 sessionStorage.removeItem("oauth_redirect");
-                window.location.href = redirect;
+                window.location.href = redirect; // ✅ go back to /oauth/authorize
               } else {
-                // ✅ internal user
-                window.location.href = "/";
+                window.location.href = "/"; // internal user
               }
             }, 300);
           } catch (err) {
