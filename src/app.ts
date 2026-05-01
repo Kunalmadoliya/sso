@@ -38,30 +38,19 @@ export function createApp() {
   app.use(
     cors({
       origin: (origin, callback) => {
-        // allow server-to-server / curl / no-origin requests
+        // allow non-browser requests (no Origin header)
         if (!origin) return callback(null, true);
 
-        // always allow your main frontend
-        const allowedStatic = ["https://kunal-auth.vercel.app"];
-
-        if (allowedStatic.includes(origin)) {
-          return callback(null, true);
-        }
-
-        // 🔥 dynamic DB check
+        // 🔥 check DB dynamically
         db.select()
           .from(clientsTable)
-          .where(eq(clientsTable.applicationURL, origin))
-          .limit(1)
-          .then((client) => {
-            if (client.length > 0) {
-              callback(null, true);
-            } else {
-              callback(new Error("CORS blocked"));
-            }
+          .then((clients) => {
+            const allowed = clients.some((c) => c.applicationURL === origin);
+
+            return callback(null, allowed); // ✅ true or false only
           })
           .catch(() => {
-            callback(new Error("CORS error"));
+            return callback(null, false); // ✅ never throw
           });
       },
 
@@ -259,16 +248,16 @@ export function createApp() {
     }
   });
 
-app.post("/logout", async (req, res) => {
-  res.clearCookie("accessToken", {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
-    path: "/",
-  });
+  app.post("/logout", async (req, res) => {
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+    });
 
-  return res.status(200).json({message: "Successfully logout"});
-});
+    return res.status(200).json({message: "Successfully logout"});
+  });
 
   app.post("/register-company", async (req, res) => {
     const {name, applicationURL, redirectUri} = req.body;
