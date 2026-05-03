@@ -142,21 +142,50 @@
       const redirect_uri = params.get("redirect_uri");
       const state = params.get("state");
 
+      console.log("🔍 Params:", {client_id, redirect_uri, state});
+
       // 🔥 Load dynamic data
       async function loadClientData() {
         try {
-          fetch(`${BASE_URL}/consent-data?client_id=${client_id}`, {
-            credentials: "include",
-          });
+          if (!client_id) {
+            console.error("❌ client_id missing in URL");
+            return;
+          }
+
+          console.log("📡 Fetching consent data...");
+
+          const res = await fetch(
+            `${BASE_URL}/consent-data?client_id=${client_id}`,
+            {
+              credentials: "include",
+            },
+          );
+
+          console.log("📥 Response status:", res.status);
+
+          if (!res.ok) {
+            const text = await res.text();
+            console.error("❌ API Error:", text);
+            return;
+          }
 
           const data = await res.json();
+          console.log("✅ Data received:", data);
 
-          document.getElementById("app-name").textContent = data.name;
-          document.getElementById("app-name-inline").textContent = data.name;
-          document.getElementById("app-domain").textContent = data.domain;
+          // 🔥 Populate UI
+          document.getElementById("app-name").textContent = data.name || "N/A";
+          document.getElementById("app-name-inline").textContent =
+            data.name || "N/A";
+          document.getElementById("app-domain").textContent =
+            data.domain || "N/A";
 
           const container = document.getElementById("scopes-container");
           container.innerHTML = "";
+
+          if (!data.scopes || data.scopes.length === 0) {
+            console.warn("⚠️ No scopes found");
+            return;
+          }
 
           data.scopes.forEach((scope) => {
             const el = document.createElement("div");
@@ -164,58 +193,65 @@
             el.className = "flex items-center gap-4 p-3 rounded-xl scope-pill";
 
             el.innerHTML = `
-        <div class="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 text-xs">
-          ${scope[0].toUpperCase()}
-        </div>
-        <div>
-          <p class="text-zinc-200 text-sm font-bold mono">${scope}</p>
-          <p class="text-[10px] text-zinc-500">Requested permission</p>
-        </div>
-      `;
+          <div class="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 text-xs">
+            ${scope[0].toUpperCase()}
+          </div>
+          <div>
+            <p class="text-zinc-200 text-sm font-bold mono">${scope}</p>
+            <p class="text-[10px] text-zinc-500">Requested permission</p>
+          </div>
+        `;
 
             container.appendChild(el);
           });
+
+          console.log("🎯 UI updated successfully");
         } catch (err) {
-          console.error(err);
+          console.error("🔥 Fetch error:", err);
         }
       }
 
-      async function approve() {
-        const res = await fetch(`${BASE_URL}/oauth/consent`, {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          credentials: "include",
-          body: JSON.stringify({client_id, redirect_uri, state}),
-        });
-
-        const data = await res.json();
-        window.location.replace(data.redirect);
-      }
-
-      loadClientData();
-
       // 🔥 Allow
       async function approve() {
-        const res = await fetch(`${BASE_URL}/oauth/consent`, {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          credentials: "include",
-          body: JSON.stringify({
-            client_id,
-            redirect_uri,
-            state,
-          }),
-        });
+        try {
+          console.log("🚀 Sending consent approval...");
 
-        const data = await res.json();
-        window.location.replace(data.redirect);
+          const res = await fetch(`${BASE_URL}/oauth/consent`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            credentials: "include",
+            body: JSON.stringify({
+              client_id,
+              redirect_uri,
+              state,
+            }),
+          });
+
+          console.log("📥 Consent response status:", res.status);
+
+          const data = await res.json();
+          console.log("✅ Redirecting to:", data.redirect);
+
+          window.location.replace(data.redirect);
+        } catch (err) {
+          console.error("❌ Approve error:", err);
+        }
       }
+
       // 🔥 Deny
       function deny() {
+        console.log("❌ Access denied");
+
         let url = redirect_uri + "?error=access_denied";
         if (state) url += "&state=" + state;
+
+        console.log("➡️ Redirecting to:", url);
+
         window.location.replace(url);
       }
+
+      // init
+      loadClientData();
 
       document.getElementById("allowBtn").onclick = approve;
       document.getElementById("denyBtn").onclick = deny;
