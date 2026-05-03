@@ -1,89 +1,87 @@
 # 🚀 Kunal Auth — OAuth 2.0 + OpenID Connect Server
 
-> A fully functional authentication server built from scratch to deeply understand how modern identity systems actually work.
+A simple authentication server built from scratch to understand how login systems really work.
 
 ---
 
 ## ✨ Overview
 
-**Kunal Auth** is a custom-built **OAuth 2.0 + OpenID Connect (OIDC)** server designed to replicate real-world authentication flows — not just in theory, but in actual working code.
+Kunal Auth is a custom OAuth 2.0 + OpenID Connect (OIDC) server.
 
-Instead of relying on third-party providers, this project implements the **entire auth lifecycle**:
+It shows how real authentication works behind the scenes:
 
-* 🔐 Login & Sessions
-* 🧾 Consent Screens
-* 🔑 Authorization Codes
-* 🎫 Access Tokens & ID Tokens
-* 🔁 Refresh Tokens
-* 🔄 Redirect-based flows
+- login
+- consent
+- tokens
+- redirects
+
+No third-party auth used — everything is built manually.
 
 ---
 
 ## 🎯 Why I Built This
 
-I wanted to go beyond tutorials and **truly understand authentication systems** by building one from scratch.
+I wanted to truly understand authentication by building it myself.
 
-Questions I explored:
+Things I explored:
 
-* How does state persist across redirects?
-* Where do PKCE and nonce fit in real flows?
-* How do multiple auth requests work simultaneously?
-* What actually happens between `/authorize` → `/token` → `/userinfo`?
-
-This project is the answer.
+- How login state works across redirects
+- How authorization codes are used
+- What happens between `/authorize → /token → /userinfo`
+- How multiple users and requests are handled
 
 ---
 
 ## ⚙️ Features
 
-### 🔐 Core Authentication
+### 🔐 Authentication
 
-* Authorization Code Flow (OIDC-first)
-* Secure login with hashed passwords + salt
-* Session management
+- Authorization Code Flow
+- Secure login with hashed passwords
+- Cookie-based sessions
 
 ### 🛡️ Security
 
-* PKCE (Proof Key for Code Exchange)
-* State & Nonce validation
-* HTTP-only cookies
-* JWT-based authentication
+- PKCE support
+- State & nonce validation
+- HTTP-only cookies
+- JWT tokens
 
-### 🎟️ Token System
+### 🎟️ Tokens
 
-* ID Tokens (identity layer)
-* Access Tokens (API access)
-* Refresh Tokens (session renewal)
+- ID Token (user info)
+- Access Token (API access)
+- Refresh Token (session renewal)
 
 ### 🔎 OIDC Support
 
-* `/.well-known/openid-configuration`
-* `/userinfo` endpoint
+- `/.well-known/openid-configuration`
+- `/userinfo` endpoint
 
-### 👤 User Control
+### 👤 User Features
 
-* View authorized apps
-* Revoke access anytime
-* Manage profile
+- View connected apps
+- Revoke access
+- Basic profile support
 
 ### 🧩 Client Features
 
-* App registration system
-* Consent-based access control
-* Multi-client support
+- Register apps
+- Consent screen
+- Multiple clients support
 
 ---
 
 ## 🔄 Authentication Flow
 
-```text
+```
 1. Client registers → gets client_id
-2. Redirect user → /authorization
-3. User logs in (if needed)
-4. Consent screen shown (if needed)
-5. Server issues authorization code
+2. User redirected → /authorize
+3. User logs in
+4. Consent screen shown
+5. Server gives authorization code
 6. Client exchanges code → /token
-7. Receives:
+7. Gets tokens:
    - ID Token
    - Access Token
    - Refresh Token
@@ -92,53 +90,51 @@ This project is the answer.
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ Tech Stack
 
-* **Backend:** Node.js + Express
-* **Database:** PostgreSQL (Drizzle ORM)
-* **Auth:** JWT (RS256 + HS256)
-* **Sessions:** Stored server-side
-* **Frontend:** HTML + TailwindCSS
+- Backend: Node.js + Express
+- Database: PostgreSQL (Drizzle ORM)
+- Auth: JWT (RS256 / HS256)
+- Frontend: HTML + TailwindCSS
 
 ---
 
-## 🧠 Key Learnings
+## 🧠 What I Learned
 
-* OAuth ≠ Authentication → OIDC adds identity layer
-* Redirect-based systems are state-heavy
-* PKCE is critical for public clients
-* Sessions + tokens must work together
-* Security ≠ just JWT → it’s flow design
+- OAuth is for access, OIDC adds identity
+- Redirect systems need proper state handling
+- PKCE is important for security
+- Tokens and sessions must work together
+- Security is about flow, not just JWT
 
 ---
 
 ## ⚠️ Limitations
 
-* Sessions stored in Postgres (not Redis)
-* No rate limiting / abuse protection
-* Static signing keys (no rotation)
-* Client registration is open
-* Secrets stored in `.env`
+- Sessions stored in database (not Redis)
+- No rate limiting
+- No key rotation
+- Basic security setup
 
 ---
 
-## 🔮 Future Improvements
+## 🔮 Future Plans
 
-* Redis-based session store ⚡
-* JWKS key rotation 🔑
-* Rate limiting & security hardening 🛡️
-* Admin dashboard 📊
-* Social login providers 🌐
+- Redis for sessions
+- Key rotation (JWKS)
+- Rate limiting
+- Admin dashboard
+- Social login
 
 ---
 
 ## 🧪 Demo
 
-Includes a **demo client application** that:
+Includes a demo client app:
 
-* Runs full OAuth + OIDC flow
-* Displays user profile data
-* Handles token exchange
+- Runs full OAuth flow
+- Exchanges tokens
+- Shows user data
 
 ---
 
@@ -150,18 +146,18 @@ Includes a **demo client application** that:
     /routes
     /db
     /auth
+
 /public
   index.html
   authenticate.html
   signup.html
   client-page.html
   /js
-    auth.js
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Setup
 
 ```bash
 git clone https://github.com/your-username/kunal-auth
@@ -179,21 +175,13 @@ JWT_SECRET=your_secret
 
 ---
 
-## ❤️ Motivation
-
-> “I wanted to learn the system by building the system.”
-
-This project is not just code — it’s a deep dive into how identity powers the modern web.
-
----
-
 ## 👨‍💻 Author
 
-**Kunal Madoliya**
-B.Tech IT | Backend & System Design Enthusiast
+Kunal Madoliya  
+B.Tech IT — Backend & Systems
 
 ---
 
-## ⭐ If you found this useful
+## ⭐ Support
 
-Give it a star ⭐ and share your feedback!
+If you found this helpful, give it a star ⭐
