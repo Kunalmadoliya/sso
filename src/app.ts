@@ -485,30 +485,69 @@ export function createApp() {
   });
 
   app.get("/apps", async (req, res) => {
-    app.get("/apps", async (req, res) => {
-      const token = req.cookies?.accessToken;
+    const token = req.cookies?.accessToken;
 
-      if (!token) {
-        return res.status(401).json({error: "Not authenticated"});
-      }
+    if (!token) {
+      return res.status(401).json({error: "Not authenticated"});
+    }
 
-      let claims: JWTClaims;
+    let claims: JWTClaims;
 
-      try {
-        claims = JWT.verify(token, PUBLIC_KEY, {
-          algorithms: ["RS256"],
-        }) as JWTClaims;
-      } catch {
-        return res.status(401).json({error: "Invalid or expired token"});
-      }
+    try {
+      claims = JWT.verify(token, PUBLIC_KEY, {
+        algorithms: ["RS256"],
+      }) as JWTClaims;
+    } catch {
+      return res.status(401).json({error: "Invalid or expired token"});
+    }
 
-      const results = await db
-        .select()
-        .from(clientsTable)
-        .where(eq(clientsTable.userId, claims.sub));
+    const results = await db
+      .select()
+      .from(clientsTable)
+      .where(eq(clientsTable.userId, claims.sub));
 
-      return res.status(200).json({results});
+    return res.status(200).json({results});
+  });
+
+  app.get("/consent-data", async (req, res) => {
+    const client_id = req.query.client_id as string;
+
+    const token = req.cookies?.accessToken;
+    if (!token) {
+      return res.status(401).json({error: "Not authenticated"});
+    }
+
+    let decoded;
+    try {
+      decoded = JWT.verify(token, PUBLIC_KEY) as {sub: string};
+    } catch {
+      return res.status(401).json({error: "Invalid token"});
+    }
+
+    const userId = decoded.sub;
+
+    if (!client_id) {
+      return res.status(400).json({error: "client_id required"});
+    }
+
+    // ✅ find that specific client
+    const [client] = await db
+      .select()
+      .from(clientsTable)
+      .where(eq(clientsTable.clientId, client_id))
+      .limit(1);
+
+    if (!client) {
+      return res.status(404).json({error: "Client not found"});
+    }
+
+    return res.json({
+      name: client.name,
+      domain: client.applicationURL,
+      userId: userId, // optional (for debug)
+      scopes: ["profile", "email"], // you can extend later
     });
   });
+
   return app;
 }

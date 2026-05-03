@@ -145,9 +145,9 @@
       // 🔥 Load dynamic data
       async function loadClientData() {
         try {
-          const res = await fetch(
-            `${BASE_URL}/consent-data?client_id=${client_id}`,
-          );
+          fetch(`${BASE_URL}/consent-data?client_id=${client_id}`, {
+            credentials: "include",
+          });
 
           const data = await res.json();
 
